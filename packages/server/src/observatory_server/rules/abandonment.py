@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal, cast
 
-from observatory.core.models import AbandonmentSignal
+from observatory_server.core.models import AbandonmentSignal
 
 
 @dataclass

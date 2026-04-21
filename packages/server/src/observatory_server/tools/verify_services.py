@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from observatory.core.context import GuardedContext
-from observatory.core.models import Capability
-from observatory.core.tracing import tracer
-from observatory.tools.list_mcp_servers import list_mcp_servers
+from observatory_server.core.context import GuardedContext
+from observatory_server.core.models import Capability
+from observatory_server.core.tracing import tracer
+from observatory_server.tools.list_mcp_servers import list_mcp_servers
 
 NEEDS = frozenset({Capability.PROM})
 

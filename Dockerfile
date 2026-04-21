@@ -11,5 +11,5 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 COPY --from=builder /install /usr/local
 RUN useradd -m -u 10001 obs
 USER 10001
-ENTRYPOINT ["observatory"]
+ENTRYPOINT ["observatory-server"]
 CMD ["--help"]

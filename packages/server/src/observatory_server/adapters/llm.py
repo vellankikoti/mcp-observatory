@@ -36,12 +36,14 @@ class LLMConfig:
         cli_offline: bool | None = None,
     ) -> LLMConfig:
         offline = (
-            cli_offline if cli_offline is not None else os.environ.get("OBSERVATORY_OFFLINE") == "1"
+            cli_offline
+            if cli_offline is not None
+            else os.environ.get("OBSERVATORY_SERVER_OFFLINE") == "1"
         )
         return cls(
-            provider=cli_provider or os.environ.get("OBSERVATORY_LLM_PROVIDER"),
-            base_url=cli_base_url or os.environ.get("OBSERVATORY_LLM_BASE_URL"),
-            api_key=cli_api_key or os.environ.get("OBSERVATORY_LLM_API_KEY"),
+            provider=cli_provider or os.environ.get("OBSERVATORY_SERVER_LLM_PROVIDER"),
+            base_url=cli_base_url or os.environ.get("OBSERVATORY_SERVER_LLM_BASE_URL"),
+            api_key=cli_api_key or os.environ.get("OBSERVATORY_SERVER_LLM_API_KEY"),
             offline=offline,
         )
 

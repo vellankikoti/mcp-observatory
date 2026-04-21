@@ -9,7 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `verify_services(expected, window)` — 9th tool; checks which expected MCP service names are visible in Prometheus; exits 1 when any are missing (CI gate for MCP deployments). `ServiceVerification` model with `ok`, `missing`, `unexpected` fields.
 - CLI subcommand `verify-services --expected a,b,c` (exits 0/1 accordingly).
 - CLI subcommand `serve-http --port 8000` — HTTP transport for in-cluster use (FastMCP 3.x `run(transport="http", port=...)`).
-- Helm `Deployment` — runs `observatory serve-http`, readOnlyRootFilesystem + non-root securityContext, pod annotations for Prometheus scraping.
+- Helm `Deployment` — runs `observatory-server serve-http`, readOnlyRootFilesystem + non-root securityContext, pod annotations for Prometheus scraping.
 - Helm `Service` — ClusterIP on port 8000 (`targetPort: http`).
 - Cluster matrix CI (`.github/workflows/cluster-matrix.yml`) — Pulumi EKS + GKE + AKS ephemeral stacks; `workflow_dispatch` + weekly Monday schedule; full 9-tool golden + integration + mcp_contract suite per cloud.
 - `infra/pulumi/{eks,gke,aks}/` — Pulumi TypeScript stacks for ephemeral K8s clusters (adapted from mcp-deploy-intel).
@@ -54,7 +54,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [0.1.0] — 2026-04-21 — walking skeleton
 
 ### Added
-- Monorepo scaffolding with TWO PyPI packages: `mcp-observatory` (server+CLI) and `mcp-observatory-sdk` (instrumentation SDK).
+- Monorepo scaffolding with TWO PyPI packages: `mcp-observatory-server` (server+CLI) and `mcp-observatory-sdk` (instrumentation SDK).
 - SDK: `instrument(server, service_name=...)` one-line FastMCP integration; `record_tool_call(...)` low-level API; `metrics_asgi_app` ASGI `/metrics` endpoint; `ToolCallOutcome` StrEnum; `prometheus_client` + `opentelemetry-api` only deps.
 - Server: 2 query tools — `list_mcp_servers` and `get_tool_call_rate` — plus CLI + MCP stdio surfaces.
 - Adapters: PromAdapter + LLMAdapter lifted from mcp-deploy-intel.

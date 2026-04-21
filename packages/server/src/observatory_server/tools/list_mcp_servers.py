@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from observatory.core.context import GuardedContext
-from observatory.core.models import Capability
-from observatory.core.tracing import tracer
+from observatory_server.core.context import GuardedContext
+from observatory_server.core.models import Capability
+from observatory_server.core.tracing import tracer
 
 NEEDS = frozenset({Capability.PROM})
 

@@ -52,7 +52,7 @@ def test_cli_list_mcp_servers(synthetic_prom):
         [
             sys.executable,
             "-m",
-            "observatory.cli",
+            "observatory_server.cli",
             "list-mcp-servers",
             "--prom-url",
             synthetic_prom,

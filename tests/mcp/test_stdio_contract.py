@@ -19,12 +19,12 @@ async def test_mcp_tools_list_over_stdio() -> None:
     proc = await asyncio.create_subprocess_exec(
         sys.executable,
         "-m",
-        "observatory.cli",
+        "observatory_server.cli",
         "serve-mcp",
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
-        env={**os.environ, "OBSERVATORY_OFFLINE": "1"},
+        env={**os.environ, "OBSERVATORY_SERVER_OFFLINE": "1"},
     )
     assert proc.stdin is not None and proc.stdout is not None
     try:

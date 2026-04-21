@@ -4,9 +4,9 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from observatory.core.context import ObservatoryContext
-from observatory.core.models import AbandonmentSignal, Capability, FleetHealth, ServerHealth
-from observatory.tools.explain_fleet_health import (
+from observatory_server.core.context import ObservatoryContext
+from observatory_server.core.models import AbandonmentSignal, Capability, FleetHealth, ServerHealth
+from observatory_server.tools.explain_fleet_health import (
     NEEDS,
     _ExplanationLLMOutput,
     explain_fleet_health,
@@ -73,15 +73,15 @@ async def test_offline_returns_deterministic_healthy() -> None:
 
     with (
         patch(
-            "observatory.tools.explain_fleet_health.list_mcp_servers",
+            "observatory_server.tools.explain_fleet_health.list_mcp_servers",
             AsyncMock(return_value=["svc-a"]),
         ),
         patch(
-            "observatory.tools.explain_fleet_health.get_fleet_health",
+            "observatory_server.tools.explain_fleet_health.get_fleet_health",
             AsyncMock(return_value=_fleet_one_server()),
         ),
         patch(
-            "observatory.tools.explain_fleet_health.detect",
+            "observatory_server.tools.explain_fleet_health.detect",
             AsyncMock(return_value=[]),
         ),
     ):
@@ -100,15 +100,15 @@ async def test_offline_partial_outage_on_confirmed() -> None:
 
     with (
         patch(
-            "observatory.tools.explain_fleet_health.list_mcp_servers",
+            "observatory_server.tools.explain_fleet_health.list_mcp_servers",
             AsyncMock(return_value=["svc-a"]),
         ),
         patch(
-            "observatory.tools.explain_fleet_health.get_fleet_health",
+            "observatory_server.tools.explain_fleet_health.get_fleet_health",
             AsyncMock(return_value=_fleet_one_server()),
         ),
         patch(
-            "observatory.tools.explain_fleet_health.detect",
+            "observatory_server.tools.explain_fleet_health.detect",
             AsyncMock(return_value=[_signal("confirmed")]),
         ),
     ):
@@ -126,15 +126,15 @@ async def test_offline_degraded_on_suspected() -> None:
 
     with (
         patch(
-            "observatory.tools.explain_fleet_health.list_mcp_servers",
+            "observatory_server.tools.explain_fleet_health.list_mcp_servers",
             AsyncMock(return_value=["svc-a"]),
         ),
         patch(
-            "observatory.tools.explain_fleet_health.get_fleet_health",
+            "observatory_server.tools.explain_fleet_health.get_fleet_health",
             AsyncMock(return_value=_fleet_one_server()),
         ),
         patch(
-            "observatory.tools.explain_fleet_health.detect",
+            "observatory_server.tools.explain_fleet_health.detect",
             AsyncMock(return_value=[_signal("suspected")]),
         ),
     ):
@@ -152,15 +152,15 @@ async def test_offline_unknown_on_empty_fleet() -> None:
 
     with (
         patch(
-            "observatory.tools.explain_fleet_health.list_mcp_servers",
+            "observatory_server.tools.explain_fleet_health.list_mcp_servers",
             AsyncMock(return_value=[]),
         ),
         patch(
-            "observatory.tools.explain_fleet_health.get_fleet_health",
+            "observatory_server.tools.explain_fleet_health.get_fleet_health",
             AsyncMock(return_value=_fleet_empty()),
         ),
         patch(
-            "observatory.tools.explain_fleet_health.detect",
+            "observatory_server.tools.explain_fleet_health.detect",
             AsyncMock(return_value=[]),
         ),
     ):
@@ -183,15 +183,15 @@ async def test_llm_success_parses_output() -> None:
 
     with (
         patch(
-            "observatory.tools.explain_fleet_health.list_mcp_servers",
+            "observatory_server.tools.explain_fleet_health.list_mcp_servers",
             AsyncMock(return_value=["svc-a"]),
         ),
         patch(
-            "observatory.tools.explain_fleet_health.get_fleet_health",
+            "observatory_server.tools.explain_fleet_health.get_fleet_health",
             AsyncMock(return_value=_fleet_one_server()),
         ),
         patch(
-            "observatory.tools.explain_fleet_health.detect",
+            "observatory_server.tools.explain_fleet_health.detect",
             AsyncMock(return_value=[]),
         ),
     ):

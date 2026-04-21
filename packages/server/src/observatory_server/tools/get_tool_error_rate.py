@@ -2,23 +2,23 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from observatory.core.context import GuardedContext
-from observatory.core.models import Capability, TimeSeries
-from observatory.core.tracing import tracer
-from observatory.tools._util import _parse_window
+from observatory_server.core.context import GuardedContext
+from observatory_server.core.models import Capability, TimeSeries
+from observatory_server.core.tracing import tracer
+from observatory_server.tools._util import _parse_window
 
 NEEDS = frozenset({Capability.PROM})
 
 
-async def get_tool_latency_p99(
+async def get_tool_error_rate(
     ctx: GuardedContext,
     service: str,
     tool: str | None = None,
     window: str = "1h",
 ) -> TimeSeries:
-    """Return p99 latency TimeSeries (seconds) for a service over window via histogram_quantile."""
-    with tracer().start_as_current_span("tool.get_tool_latency_p99") as span:
-        span.set_attribute("tool.name", "get_tool_latency_p99")
+    """Return error-rate TimeSeries (ratio of error calls to total) for a service over window."""
+    with tracer().start_as_current_span("tool.get_tool_error_rate") as span:
+        span.set_attribute("tool.name", "get_tool_error_rate")
         span.set_attribute("service", service)
         span.set_attribute("window", window)
         delta = _parse_window(window)
@@ -27,8 +27,8 @@ async def get_tool_latency_p99(
         step = max(15.0, delta.total_seconds() / 300)
         tool_clause = f',tool="{tool}"' if tool else ""
         promql = (
-            f"histogram_quantile(0.99, sum by (le)("
-            f'rate(mcp_tool_duration_seconds_bucket{{service="{service}"{tool_clause}}}[5m])))'
+            f'sum(rate(mcp_tool_calls_total{{service="{service}",outcome="error"{tool_clause}}}[5m])) '
+            f'/ sum(rate(mcp_tool_calls_total{{service="{service}"{tool_clause}}}[5m]))'
         )
         data = await ctx.prom.query_range(promql, start.timestamp(), end.timestamp(), step)
         samples: list[tuple[datetime, float]] = []

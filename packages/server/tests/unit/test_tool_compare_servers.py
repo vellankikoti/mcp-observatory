@@ -3,8 +3,8 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from observatory.core.context import ObservatoryContext
-from observatory.tools.compare_servers import NEEDS, compare_servers
+from observatory_server.core.context import ObservatoryContext
+from observatory_server.tools.compare_servers import NEEDS, compare_servers
 
 
 def _ctx(side_effects: list) -> ObservatoryContext:

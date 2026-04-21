@@ -3,11 +3,11 @@ from __future__ import annotations
 import contextlib
 from datetime import UTC, datetime
 
-from observatory.core.context import GuardedContext
-from observatory.core.models import Capability, FleetHealth, ServerHealth
-from observatory.core.tracing import tracer
-from observatory.rules.abandonment import detect
-from observatory.tools.list_mcp_servers import list_mcp_servers
+from observatory_server.core.context import GuardedContext
+from observatory_server.core.models import Capability, FleetHealth, ServerHealth
+from observatory_server.core.tracing import tracer
+from observatory_server.rules.abandonment import detect
+from observatory_server.tools.list_mcp_servers import list_mcp_servers
 
 NEEDS = frozenset({Capability.PROM})
 

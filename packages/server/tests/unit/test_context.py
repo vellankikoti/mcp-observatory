@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import pytest
-from observatory.adapters.llm import LLMAdapter, LLMConfig
-from observatory.adapters.prom import PromAdapter, PromConfig
-from observatory.core.context import ObservatoryContext
-from observatory.core.models import Capability
+from observatory_server.adapters.llm import LLMAdapter, LLMConfig
+from observatory_server.adapters.prom import PromAdapter, PromConfig
+from observatory_server.core.context import ObservatoryContext
+from observatory_server.core.models import Capability
 
 
 def _make_ctx() -> ObservatoryContext:

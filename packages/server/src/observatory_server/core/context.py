@@ -3,11 +3,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from observatory.core.models import Capability
+from observatory_server.core.models import Capability
 
 if TYPE_CHECKING:
-    from observatory.adapters.llm import LLMAdapter
-    from observatory.adapters.prom import PromAdapter
+    from observatory_server.adapters.llm import LLMAdapter
+    from observatory_server.adapters.prom import PromAdapter
 
 
 @dataclass

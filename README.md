@@ -4,7 +4,7 @@
 
 **Status:** v1.0.0 — production-ready. 9 tools live. HTTP transport. Helm Deployment + Service.
 
-[![PyPI](https://img.shields.io/pypi/v/mcp-observatory)](https://pypi.org/project/mcp-observatory/)
+[![PyPI](https://img.shields.io/pypi/v/mcp-observatory-server)](https://pypi.org/project/mcp-observatory-server/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 ---
@@ -13,7 +13,7 @@
 
 | Package | PyPI name | Description |
 |---------|-----------|-------------|
-| `packages/server` | `mcp-observatory` | MCP query router — 9 tools, Typer CLI, FastMCP stdio + HTTP surfaces |
+| `packages/server` | `mcp-observatory-server` | MCP query router — 9 tools, Typer CLI, FastMCP stdio + HTTP surfaces |
 | `packages/sdk` | `mcp-observatory-sdk` | Tiny SDK: `instrument(server)`, Prometheus metrics, OTel spans, ASGI `/metrics` |
 
 ---
@@ -39,39 +39,39 @@
 ### A. pip
 
 ```bash
-pip install mcp-observatory mcp-observatory-sdk
+pip install mcp-observatory-server mcp-observatory-sdk
 ```
 
 ### B. uv
 
 ```bash
-uv add mcp-observatory mcp-observatory-sdk
+uv add mcp-observatory-server mcp-observatory-sdk
 ```
 
 ### C. uvx (no install)
 
 ```bash
-uvx mcp-observatory list-mcp-servers --prom-url http://localhost:9090
+uvx mcp-observatory-server list-mcp-servers --prom-url http://localhost:9090
 ```
 
 ### D. Docker
 
 ```bash
-docker pull ghcr.io/vellankikoti/mcp-observatory:v1.0.0
-docker run --rm ghcr.io/vellankikoti/mcp-observatory:v1.0.0 list-mcp-servers --help
+docker pull ghcr.io/vellankikoti/mcp-observatory-server:v1.0.0
+docker run --rm ghcr.io/vellankikoti/mcp-observatory-server:v1.0.0 list-mcp-servers --help
 ```
 
 ### E. Helm (in-cluster HTTP transport)
 
 ```bash
 helm repo add observatory https://vellankikoti.github.io/mcp-observatory
-helm install obs observatory/observatory \
+helm install obs observatory/observatory-server \
   --namespace obs \
   --create-namespace \
   --set prometheus.url=http://prometheus.monitoring.svc.cluster.local:9090
 ```
 
-The chart deploys a `Deployment` running `observatory serve-http --port 8000`
+The chart deploys a `Deployment` running `observatory-server serve-http --port 8000`
 and a `ClusterIP` Service. Access from within the cluster:
 `http://obs-observatory.obs.svc.cluster.local:8000/mcp/`
 
@@ -80,40 +80,40 @@ and a `ClusterIP` Service. Access from within the cluster:
 ## Quickstart — CLI
 
 ```bash
-export OBSERVATORY_PROM_URL=http://localhost:9090
+export OBSERVATORY_SERVER_PROM_URL=http://localhost:9090
 
 # List active MCP servers
-observatory list-mcp-servers --window 24h
+observatory-server list-mcp-servers --window 24h
 
 # Tool call rate (1h window)
-observatory get-tool-call-rate my-service --window 1h
+observatory-server get-tool-call-rate my-service --window 1h
 
 # Error rate
-observatory get-tool-error-rate my-service --window 1h
+observatory-server get-tool-error-rate my-service --window 1h
 
 # p99 latency filtered to one tool
-observatory get-tool-latency-p99 my-service --tool my_tool --window 1h
+observatory-server get-tool-latency-p99 my-service --tool my_tool --window 1h
 
 # Compare two services
-observatory compare-servers svc-a svc-b --window 1h
+observatory-server compare-servers svc-a svc-b --window 1h
 
 # Detect silently abandoned tools
-observatory detect-tool-abandonment
+observatory-server detect-tool-abandonment
 
 # Fleet-wide health snapshot
-observatory get-fleet-health --window 24h
+observatory-server get-fleet-health --window 24h
 
 # LLM narrative (deterministic fallback when no LLM configured)
-observatory explain-fleet-health
+observatory-server explain-fleet-health
 
 # CI gate — exits 1 if prod-readiness or search-service are absent
-observatory verify-services --expected prod-readiness,search-service && echo "all present"
+observatory-server verify-services --expected prod-readiness,search-service && echo "all present"
 
 # Run as MCP stdio server (Claude Desktop / any MCP client)
-observatory serve-mcp
+observatory-server serve-mcp
 
 # Run as MCP HTTP server (in-cluster, port 8000)
-observatory serve-http --port 8000 --prom-url http://prometheus:9090 --no-llm
+observatory-server serve-http --port 8000 --prom-url http://prometheus:9090 --no-llm
 ```
 
 ### MCP client config (Claude Desktop)
@@ -122,10 +122,10 @@ observatory serve-http --port 8000 --prom-url http://prometheus:9090 --no-llm
 {
   "mcpServers": {
     "observatory": {
-      "command": "observatory",
+      "command": "observatory-server",
       "args": ["serve-mcp"],
       "env": {
-        "OBSERVATORY_PROM_URL": "http://localhost:9090"
+        "OBSERVATORY_SERVER_PROM_URL": "http://localhost:9090"
       }
     }
   }
@@ -150,7 +150,7 @@ async def my_tool(query: str) -> str: ...
 ```
 
 This exposes `mcp_tool_calls_total`, `mcp_tool_duration_seconds`, and
-`mcp_tool_inflight` metrics plus OTel spans — the exact names `mcp-observatory`
+`mcp_tool_inflight` metrics plus OTel spans — the exact names `mcp-observatory-server`
 queries.
 
 Full guide: **[docs/sdk-integration.md](docs/sdk-integration.md)**
@@ -163,14 +163,14 @@ Full guide: **[docs/sdk-integration.md](docs/sdk-integration.md)**
 
 ```bash
 # Ollama (local)
-export OBSERVATORY_LLM_PROVIDER=ollama/qwen2.5:7b
+export OBSERVATORY_SERVER_LLM_PROVIDER=ollama/qwen2.5:7b
 
 # Any LiteLLM-compatible provider
-export OBSERVATORY_LLM_PROVIDER=openai/gpt-4o-mini
+export OBSERVATORY_SERVER_LLM_PROVIDER=openai/gpt-4o-mini
 export OPENAI_API_KEY=sk-...
 
 # Disable LLM entirely
-observatory explain-fleet-health  # falls back automatically when no provider set
+observatory-server explain-fleet-health  # falls back automatically when no provider set
 ```
 
 ---
@@ -181,13 +181,13 @@ observatory explain-fleet-health  # falls back automatically when no provider se
 cosign verify \
   --certificate-identity-regexp "https://github.com/vellankikoti/mcp-observatory" \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-  ghcr.io/vellankikoti/mcp-observatory:v1.0.0
+  ghcr.io/vellankikoti/mcp-observatory-server:v1.0.0
 ```
 
 SBOM (CycloneDX) is attached as an OCI referrer — fetch with:
 
 ```bash
-cosign download sbom ghcr.io/vellankikoti/mcp-observatory:v1.0.0
+cosign download sbom ghcr.io/vellankikoti/mcp-observatory-server:v1.0.0
 ```
 
 ---

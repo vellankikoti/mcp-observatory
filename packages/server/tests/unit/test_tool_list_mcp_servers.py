@@ -3,8 +3,8 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from observatory.core.context import ObservatoryContext
-from observatory.tools.list_mcp_servers import NEEDS, list_mcp_servers
+from observatory_server.core.context import ObservatoryContext
+from observatory_server.tools.list_mcp_servers import NEEDS, list_mcp_servers
 
 
 def _ctx(prom_result: dict) -> ObservatoryContext:

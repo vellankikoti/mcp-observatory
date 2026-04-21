@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 
 import pytest
-from observatory.cli import app
+from observatory_server.cli import app
 from typer.testing import CliRunner
 
 runner = CliRunner()

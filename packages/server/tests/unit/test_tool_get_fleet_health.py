@@ -3,9 +3,9 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from observatory.core.context import ObservatoryContext
-from observatory.core.models import AbandonmentSignal, Capability
-from observatory.tools.get_fleet_health import NEEDS, get_fleet_health
+from observatory_server.core.context import ObservatoryContext
+from observatory_server.core.models import AbandonmentSignal, Capability
+from observatory_server.tools.get_fleet_health import NEEDS, get_fleet_health
 
 
 def _ctx(prom) -> ObservatoryContext:
@@ -91,7 +91,7 @@ async def test_abandonment_signals_lower_healthy_count() -> None:
     ctx = _ctx(prom).guard(needs=NEEDS)
 
     with patch(
-        "observatory.tools.get_fleet_health.detect",
+        "observatory_server.tools.get_fleet_health.detect",
         AsyncMock(return_value=[confirmed_signal]),
     ):
         result = await get_fleet_health(ctx)

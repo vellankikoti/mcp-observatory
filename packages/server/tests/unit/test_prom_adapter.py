@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 
 import pytest
-from observatory.adapters.prom import PromAdapter, PromConfig
+from observatory_server.adapters.prom import PromAdapter, PromConfig
 
 try:
     from pytest_httpx import HTTPXMock

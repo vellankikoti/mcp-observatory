@@ -4,17 +4,17 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from observatory.core.context import GuardedContext
-from observatory.core.models import (
+from observatory_server.core.context import GuardedContext
+from observatory_server.core.models import (
     AbandonmentSignal,
     Capability,
     FleetHealth,
     FleetHealthExplanation,
 )
-from observatory.core.tracing import tracer
-from observatory.rules.abandonment import detect
-from observatory.tools.get_fleet_health import get_fleet_health
-from observatory.tools.list_mcp_servers import list_mcp_servers
+from observatory_server.core.tracing import tracer
+from observatory_server.rules.abandonment import detect
+from observatory_server.tools.get_fleet_health import get_fleet_health
+from observatory_server.tools.list_mcp_servers import list_mcp_servers
 
 NEEDS = frozenset({Capability.PROM, Capability.LLM})
 

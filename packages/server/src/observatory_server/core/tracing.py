@@ -3,7 +3,7 @@ from __future__ import annotations
 from opentelemetry import trace
 from opentelemetry.trace import Tracer
 
-_NAME = "observatory"
+_NAME = "observatory-server"
 
 
 def tracer() -> Tracer:

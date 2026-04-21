@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "observatory.fullname" . }}
+  name: {{ include "observatory-server.fullname" . }}
   namespace: {{ .Release.Namespace }}
-  labels: {{- include "observatory.labels" . | nindent 4 }}
+  labels: {{- include "observatory-server.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
-    matchLabels: {{- include "observatory.selectorLabels" . | nindent 6 }}
+    matchLabels: {{- include "observatory-server.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      labels: {{- include "observatory.selectorLabels" . | nindent 8 }}
+      labels: {{- include "observatory-server.selectorLabels" . | nindent 8 }}
       annotations: {{- toYaml .Values.podAnnotations | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "observatory.serviceAccountName" . }}
+      serviceAccountName: {{ include "observatory-server.serviceAccountName" . }}
       containers:
-        - name: observatory
+        - name: observatory-server
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:

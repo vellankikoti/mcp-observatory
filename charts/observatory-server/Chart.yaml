@@ -1,5 +1,5 @@
 apiVersion: v2
-name: observatory
+name: observatory-server
 description: MCP Observatory — observe distributed MCP server fleets from Prometheus.
 type: application
 version: 0.1.0

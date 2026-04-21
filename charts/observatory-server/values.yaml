@@ -1,5 +1,5 @@
 image:
-  repository: ghcr.io/vellankikoti/mcp-observatory
+  repository: ghcr.io/vellankikoti/mcp-observatory-server
   tag: "v1.0.0"
   pullPolicy: IfNotPresent
   imagePullSecrets: []

@@ -1,13 +1,13 @@
 # SDK Integration Guide — adopting `mcp-observatory-sdk` in a FastMCP server
 
 This guide shows how any FastMCP server can adopt `mcp-observatory-sdk` to expose
-the Prometheus metrics and OpenTelemetry spans that `mcp-observatory` needs.
+the Prometheus metrics and OpenTelemetry spans that `mcp-observatory-server` needs.
 
 ---
 
 ## Why consistent metric names matter
 
-`mcp-observatory` queries Prometheus for metrics named:
+`mcp-observatory-server` queries Prometheus for metrics named:
 
 | Metric | Description |
 |--------|-------------|
@@ -21,7 +21,7 @@ non-standard metric names the baseline will always be zero and every tool will
 appear healthy regardless of its actual state.
 
 `instrument()` wraps every `@server.tool` handler at registration time and emits
-exactly these metric names, so observatory sees all servers uniformly.
+exactly these metric names, so observatory-server sees all servers uniformly.
 
 ---
 

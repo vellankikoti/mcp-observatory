@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 
-from observatory.mcp_server import build_server
+from observatory_server.mcp_server import build_server
 
 
 def test_mcp_server_exposes_expected_tools() -> None:

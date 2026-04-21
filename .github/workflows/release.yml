@@ -47,8 +47,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/mcp-observatory:${{ github.ref_name }}
-            ghcr.io/${{ github.repository_owner }}/mcp-observatory:latest
+            ghcr.io/${{ github.repository_owner }}/mcp-observatory-server:${{ github.ref_name }}
+            ghcr.io/${{ github.repository_owner }}/mcp-observatory-server:latest
           sbom: true
           provenance: true
       - uses: sigstore/cosign-installer@v3.5.0
@@ -58,11 +58,11 @@ jobs:
           COSIGN_EXPERIMENTAL: "1"
           DIGEST: ${{ steps.build.outputs.digest }}
           OWNER: ${{ github.repository_owner }}
-        run: cosign sign --yes "ghcr.io/${OWNER}/mcp-observatory@${DIGEST}"
+        run: cosign sign --yes "ghcr.io/${OWNER}/mcp-observatory-server@${DIGEST}"
       - id: sbom
         uses: anchore/sbom-action@v0
         with:
-          image: "ghcr.io/${{ github.repository_owner }}/mcp-observatory:${{ github.ref_name }}"
+          image: "ghcr.io/${{ github.repository_owner }}/mcp-observatory-server:${{ github.ref_name }}"
           format: cyclonedx-json
           artifact-name: sbom-${{ github.ref_name }}.cdx.json
       - name: Attach SBOM

@@ -4,7 +4,7 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from observatory.rules.abandonment import AbandonmentThresholds, detect
+from observatory_server.rules.abandonment import AbandonmentThresholds, detect
 
 
 def _vector(service: str, tool: str, value: str) -> dict:

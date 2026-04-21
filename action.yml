@@ -1,5 +1,5 @@
-name: "mcp-observatory"
-description: "Run observatory CLI to query MCP server fleet metrics from Prometheus."
+name: "mcp-observatory-server"
+description: "Run observatory-server CLI to query MCP server fleet metrics from Prometheus."
 branding:
   icon: activity
   color: green
@@ -26,7 +26,7 @@ inputs:
   image:
     description: "Override the action's container image."
     required: false
-    default: "ghcr.io/vellankikoti/mcp-observatory:v0.1.0"
+    default: "ghcr.io/vellankikoti/mcp-observatory-server:v0.1.0"
 outputs:
   report-path:
     description: "Path to the produced report file."
@@ -48,10 +48,10 @@ runs:
         report="${RUNNER_TEMP:-/tmp}/observatory-report.${INPUT_FORMAT}"
         docker_args=(run --rm --network=host -v "${PWD}:/workspace" -w /workspace)
         if [[ "${INPUT_OFFLINE}" == "true" ]]; then
-          docker_args+=(-e "OBSERVATORY_OFFLINE=1")
+          docker_args+=(-e "OBSERVATORY_SERVER_OFFLINE=1")
         fi
         if [[ -n "${INPUT_PROM_URL:-}" ]]; then
-          docker_args+=(-e "OBSERVATORY_PROM_URL=${INPUT_PROM_URL}")
+          docker_args+=(-e "OBSERVATORY_SERVER_PROM_URL=${INPUT_PROM_URL}")
         fi
         set +e
         # shellcheck disable=SC2206

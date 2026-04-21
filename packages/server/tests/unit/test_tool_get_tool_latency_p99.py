@@ -4,8 +4,8 @@ import time
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from observatory.core.context import ObservatoryContext
-from observatory.tools.get_tool_latency_p99 import NEEDS, get_tool_latency_p99
+from observatory_server.core.context import ObservatoryContext
+from observatory_server.tools.get_tool_latency_p99 import NEEDS, get_tool_latency_p99
 
 
 def _ctx(prom_result: dict) -> ObservatoryContext:

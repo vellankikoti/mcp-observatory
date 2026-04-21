@@ -5,31 +5,35 @@ import sys
 
 import typer
 
-from observatory.adapters.llm import LLMAdapter, LLMConfig
-from observatory.adapters.prom import PromAdapter, PromConfig
-from observatory.core.context import ObservatoryContext
-from observatory.reports.json import render_json
-from observatory.reports.markdown import render_markdown
-from observatory.tools.compare_servers import NEEDS as COMPARE_NEEDS
-from observatory.tools.compare_servers import compare_servers as _compare_servers
-from observatory.tools.detect_tool_abandonment import NEEDS as DETECT_ABANDONMENT_NEEDS
-from observatory.tools.detect_tool_abandonment import (
+from observatory_server.adapters.llm import LLMAdapter, LLMConfig
+from observatory_server.adapters.prom import PromAdapter, PromConfig
+from observatory_server.core.context import ObservatoryContext
+from observatory_server.reports.json import render_json
+from observatory_server.reports.markdown import render_markdown
+from observatory_server.tools.compare_servers import NEEDS as COMPARE_NEEDS
+from observatory_server.tools.compare_servers import compare_servers as _compare_servers
+from observatory_server.tools.detect_tool_abandonment import NEEDS as DETECT_ABANDONMENT_NEEDS
+from observatory_server.tools.detect_tool_abandonment import (
     detect_tool_abandonment as _detect_tool_abandonment,
 )
-from observatory.tools.explain_fleet_health import NEEDS as EXPLAIN_FLEET_NEEDS
-from observatory.tools.explain_fleet_health import explain_fleet_health as _explain_fleet_health
-from observatory.tools.get_fleet_health import NEEDS as GET_FLEET_NEEDS
-from observatory.tools.get_fleet_health import get_fleet_health as _get_fleet_health
-from observatory.tools.get_tool_call_rate import NEEDS as GET_RATE_NEEDS
-from observatory.tools.get_tool_call_rate import get_tool_call_rate as _get_tool_call_rate
-from observatory.tools.get_tool_error_rate import NEEDS as GET_ERROR_RATE_NEEDS
-from observatory.tools.get_tool_error_rate import get_tool_error_rate as _get_tool_error_rate
-from observatory.tools.get_tool_latency_p99 import NEEDS as GET_LATENCY_NEEDS
-from observatory.tools.get_tool_latency_p99 import get_tool_latency_p99 as _get_tool_latency_p99
-from observatory.tools.list_mcp_servers import NEEDS as LIST_SERVERS_NEEDS
-from observatory.tools.list_mcp_servers import list_mcp_servers as _list_mcp_servers
-from observatory.tools.verify_services import NEEDS as VERIFY_SERVICES_NEEDS
-from observatory.tools.verify_services import verify_services as _verify_services
+from observatory_server.tools.explain_fleet_health import NEEDS as EXPLAIN_FLEET_NEEDS
+from observatory_server.tools.explain_fleet_health import (
+    explain_fleet_health as _explain_fleet_health,
+)
+from observatory_server.tools.get_fleet_health import NEEDS as GET_FLEET_NEEDS
+from observatory_server.tools.get_fleet_health import get_fleet_health as _get_fleet_health
+from observatory_server.tools.get_tool_call_rate import NEEDS as GET_RATE_NEEDS
+from observatory_server.tools.get_tool_call_rate import get_tool_call_rate as _get_tool_call_rate
+from observatory_server.tools.get_tool_error_rate import NEEDS as GET_ERROR_RATE_NEEDS
+from observatory_server.tools.get_tool_error_rate import get_tool_error_rate as _get_tool_error_rate
+from observatory_server.tools.get_tool_latency_p99 import NEEDS as GET_LATENCY_NEEDS
+from observatory_server.tools.get_tool_latency_p99 import (
+    get_tool_latency_p99 as _get_tool_latency_p99,
+)
+from observatory_server.tools.list_mcp_servers import NEEDS as LIST_SERVERS_NEEDS
+from observatory_server.tools.list_mcp_servers import list_mcp_servers as _list_mcp_servers
+from observatory_server.tools.verify_services import NEEDS as VERIFY_SERVICES_NEEDS
+from observatory_server.tools.verify_services import verify_services as _verify_services
 
 app = typer.Typer(
     add_completion=False,
@@ -246,7 +250,7 @@ def verify_services_cmd(
 @app.command("serve-mcp")
 def serve_mcp() -> None:
     """Run the MCP stdio server."""
-    from observatory.mcp_server import run_stdio
+    from observatory_server.mcp_server import run_stdio
 
     run_stdio()
 
@@ -261,11 +265,11 @@ def serve_http_cmd(
     import os
 
     if prom_url:
-        os.environ.setdefault("OBSERVATORY_PROM_URL", prom_url)
+        os.environ.setdefault("OBSERVATORY_SERVER_PROM_URL", prom_url)
     if offline:
-        os.environ.setdefault("OBSERVATORY_LLM_PROVIDER", "offline")
+        os.environ.setdefault("OBSERVATORY_SERVER_LLM_PROVIDER", "offline")
 
-    from observatory.mcp_server import build_server
+    from observatory_server.mcp_server import build_server
 
     build_server().run(transport="http", port=port, show_banner=False)
 

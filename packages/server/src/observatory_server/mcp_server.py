@@ -2,37 +2,41 @@ from __future__ import annotations
 
 from fastmcp import FastMCP
 
-from observatory.adapters.llm import LLMAdapter, LLMConfig
-from observatory.adapters.prom import PromAdapter, PromConfig
-from observatory.core.context import ObservatoryContext
-from observatory.core.models import (
+from observatory_server.adapters.llm import LLMAdapter, LLMConfig
+from observatory_server.adapters.prom import PromAdapter, PromConfig
+from observatory_server.core.context import ObservatoryContext
+from observatory_server.core.models import (
     AbandonmentSignal,
     FleetHealth,
     FleetHealthExplanation,
     ServerComparison,
     TimeSeries,
 )
-from observatory.tools.compare_servers import NEEDS as COMPARE_NEEDS
-from observatory.tools.compare_servers import compare_servers as _compare_servers
-from observatory.tools.detect_tool_abandonment import NEEDS as DETECT_ABANDONMENT_NEEDS
-from observatory.tools.detect_tool_abandonment import (
+from observatory_server.tools.compare_servers import NEEDS as COMPARE_NEEDS
+from observatory_server.tools.compare_servers import compare_servers as _compare_servers
+from observatory_server.tools.detect_tool_abandonment import NEEDS as DETECT_ABANDONMENT_NEEDS
+from observatory_server.tools.detect_tool_abandonment import (
     detect_tool_abandonment as _detect_tool_abandonment,
 )
-from observatory.tools.explain_fleet_health import NEEDS as EXPLAIN_FLEET_NEEDS
-from observatory.tools.explain_fleet_health import explain_fleet_health as _explain_fleet_health
-from observatory.tools.get_fleet_health import NEEDS as GET_FLEET_NEEDS
-from observatory.tools.get_fleet_health import get_fleet_health as _get_fleet_health
-from observatory.tools.get_tool_call_rate import NEEDS as GET_RATE_NEEDS
-from observatory.tools.get_tool_call_rate import get_tool_call_rate as _get_tool_call_rate
-from observatory.tools.get_tool_error_rate import NEEDS as GET_ERROR_RATE_NEEDS
-from observatory.tools.get_tool_error_rate import get_tool_error_rate as _get_tool_error_rate
-from observatory.tools.get_tool_latency_p99 import NEEDS as GET_LATENCY_NEEDS
-from observatory.tools.get_tool_latency_p99 import get_tool_latency_p99 as _get_tool_latency_p99
-from observatory.tools.list_mcp_servers import NEEDS as LIST_SERVERS_NEEDS
-from observatory.tools.list_mcp_servers import list_mcp_servers as _list_mcp_servers
-from observatory.tools.verify_services import NEEDS as VERIFY_SERVICES_NEEDS
-from observatory.tools.verify_services import ServiceVerification
-from observatory.tools.verify_services import verify_services as _verify_services
+from observatory_server.tools.explain_fleet_health import NEEDS as EXPLAIN_FLEET_NEEDS
+from observatory_server.tools.explain_fleet_health import (
+    explain_fleet_health as _explain_fleet_health,
+)
+from observatory_server.tools.get_fleet_health import NEEDS as GET_FLEET_NEEDS
+from observatory_server.tools.get_fleet_health import get_fleet_health as _get_fleet_health
+from observatory_server.tools.get_tool_call_rate import NEEDS as GET_RATE_NEEDS
+from observatory_server.tools.get_tool_call_rate import get_tool_call_rate as _get_tool_call_rate
+from observatory_server.tools.get_tool_error_rate import NEEDS as GET_ERROR_RATE_NEEDS
+from observatory_server.tools.get_tool_error_rate import get_tool_error_rate as _get_tool_error_rate
+from observatory_server.tools.get_tool_latency_p99 import NEEDS as GET_LATENCY_NEEDS
+from observatory_server.tools.get_tool_latency_p99 import (
+    get_tool_latency_p99 as _get_tool_latency_p99,
+)
+from observatory_server.tools.list_mcp_servers import NEEDS as LIST_SERVERS_NEEDS
+from observatory_server.tools.list_mcp_servers import list_mcp_servers as _list_mcp_servers
+from observatory_server.tools.verify_services import NEEDS as VERIFY_SERVICES_NEEDS
+from observatory_server.tools.verify_services import ServiceVerification
+from observatory_server.tools.verify_services import verify_services as _verify_services
 
 _DEFAULT_PROM_URL = "http://localhost:9090"
 
@@ -44,7 +48,7 @@ def _build_ctx() -> ObservatoryContext:
 
 
 def build_server() -> FastMCP:
-    server = FastMCP("mcp-observatory")
+    server = FastMCP("mcp-observatory-server")
 
     @server.tool(name="list_mcp_servers")
     async def list_mcp_servers_tool(window: str = "24h") -> list[str]:

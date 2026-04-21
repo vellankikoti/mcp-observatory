@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from observatory.core.models import AbandonmentSignal, TimeSeries
+from observatory_server.core.models import AbandonmentSignal, TimeSeries
 
 
 def _dt(ts: float) -> datetime:

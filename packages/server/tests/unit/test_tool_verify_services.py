@@ -3,8 +3,8 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from observatory.core.context import ObservatoryContext
-from observatory.tools.verify_services import NEEDS, verify_services
+from observatory_server.core.context import ObservatoryContext
+from observatory_server.tools.verify_services import NEEDS, verify_services
 
 
 def _ctx(seen_services: list[str]) -> ObservatoryContext:

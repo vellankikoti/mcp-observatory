@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from observatory.adapters.llm import LLMAdapter, LLMConfig
-from observatory.core.context import ObservatoryContext
+from observatory_server.adapters.llm import LLMAdapter, LLMConfig
+from observatory_server.core.context import ObservatoryContext
 
 
 class FakePromAdapter:
@@ -50,15 +50,15 @@ def build_fake_ctx(canned: dict[str, Any]) -> ObservatoryContext:
 async def run_tool(ctx: ObservatoryContext, tool_name: str, args: dict[str, Any]) -> Any:
     """Dispatch to the tool function by name."""
     if tool_name == "list_mcp_servers":
-        from observatory.tools.list_mcp_servers import NEEDS, list_mcp_servers
+        from observatory_server.tools.list_mcp_servers import NEEDS, list_mcp_servers
 
         return await list_mcp_servers(ctx.guard(needs=NEEDS), **args)
     if tool_name == "get_tool_call_rate":
-        from observatory.tools.get_tool_call_rate import NEEDS, get_tool_call_rate
+        from observatory_server.tools.get_tool_call_rate import NEEDS, get_tool_call_rate
 
         return await get_tool_call_rate(ctx.guard(needs=NEEDS), **args)
     if tool_name == "detect_tool_abandonment":
-        from observatory.tools.detect_tool_abandonment import (
+        from observatory_server.tools.detect_tool_abandonment import (
             NEEDS,
             detect_tool_abandonment,
         )

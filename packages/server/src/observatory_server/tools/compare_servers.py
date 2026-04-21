@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import asyncio
 
-from observatory.core.context import GuardedContext
-from observatory.core.models import Capability, ServerComparison
-from observatory.core.tracing import tracer
-from observatory.tools._util import _parse_window
+from observatory_server.core.context import GuardedContext
+from observatory_server.core.models import Capability, ServerComparison
+from observatory_server.core.tracing import tracer
+from observatory_server.tools._util import _parse_window
 
 NEEDS = frozenset({Capability.PROM})
 
