@@ -1,0 +1,5 @@
+name: mcp-observatory-aks
+runtime: nodejs
+description: Ephemeral AKS cluster for mcp-observatory cluster matrix.
+config:
+  azure-native:location: eastus

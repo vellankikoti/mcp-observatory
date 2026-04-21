@@ -1,0 +1,102 @@
+name: cluster-matrix
+on:
+  workflow_dispatch:
+    inputs:
+      clouds:
+        description: "Comma-separated: aws,gcp,azure"
+        required: true
+        default: "aws,gcp,azure"
+  schedule:
+    - cron: "0 7 * * 1"   # 07:00 UTC every Monday
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build.outputs.matrix }}
+    steps:
+      - id: build
+        shell: bash
+        run: |
+          clouds="${{ github.event.inputs.clouds || 'aws,gcp,azure' }}"
+          IFS=',' read -r -a arr <<< "$clouds"
+          json='['
+          sep=''
+          for c in "${arr[@]}"; do
+            json="$json$sep{\"cloud\":\"$c\"}"
+            sep=','
+          done
+          json="$json]"
+          echo "matrix={\"include\":$json}" >> "$GITHUB_OUTPUT"
+
+  matrix:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv python install 3.11
+      - run: uv sync --all-extras
+
+      - uses: pulumi/actions@v6
+        with:
+          command: up
+          stack-name: ${{ matrix.cloud }}-ephemeral
+          work-dir: infra/pulumi/${{ matrix.cloud == 'aws' && 'eks' || matrix.cloud == 'gcp' && 'gke' || 'aks' }}
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+          GOOGLE_PROJECT: ${{ secrets.GCP_PROJECT }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Fetch kubeconfig from Pulumi
+        id: kubeconfig
+        shell: bash
+        working-directory: infra/pulumi/${{ matrix.cloud == 'aws' && 'eks' || matrix.cloud == 'gcp' && 'gke' || 'aks' }}
+        run: |
+          pulumi stack output kubeconfig --show-secrets > "$RUNNER_TEMP/kubeconfig"
+          echo "path=$RUNNER_TEMP/kubeconfig" >> "$GITHUB_OUTPUT"
+
+      - name: Run golden + integration + mcp_contract against ${{ matrix.cloud }}
+        env:
+          KUBECONFIG: ${{ steps.kubeconfig.outputs.path }}
+        run: |
+          set -e
+          for tool_id in list_mcp_servers get_tool_call_rate get_tool_error_rate get_tool_latency_p99 compare_servers detect_tool_abandonment get_fleet_health explain_fleet_health verify_services; do
+            echo "=== ${{ matrix.cloud }} :: $tool_id ==="
+            uv run pytest -m golden -k "$tool_id" --tb=short || exit 1
+          done
+          uv run pytest -m integration -v
+          uv run pytest -m mcp_contract -v
+
+      - name: Destroy Pulumi stack
+        if: always()
+        uses: pulumi/actions@v6
+        with:
+          command: destroy
+          stack-name: ${{ matrix.cloud }}-ephemeral
+          work-dir: infra/pulumi/${{ matrix.cloud == 'aws' && 'eks' || matrix.cloud == 'gcp' && 'gke' || 'aks' }}
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+          GOOGLE_PROJECT: ${{ secrets.GCP_PROJECT }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

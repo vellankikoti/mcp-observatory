@@ -1,0 +1,5 @@
+name: mcp-observatory-eks
+runtime: nodejs
+description: Ephemeral EKS cluster for mcp-observatory cluster matrix.
+config:
+  aws:region: us-east-1

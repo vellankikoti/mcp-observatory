@@ -1,0 +1,5 @@
+name: mcp-observatory-gke
+runtime: nodejs
+description: Ephemeral GKE cluster for mcp-observatory cluster matrix.
+config:
+  gcp:region: us-central1
