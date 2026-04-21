@@ -9,13 +9,18 @@ WF = Path(".github/workflows/release.yml")
 
 def test_release_workflow_publishes_both_packages():
     data = yaml.safe_load(WF.read_text())
-    pypi_job = data["jobs"]["pypi"]
-    steps = pypi_job["steps"]
-    names = [s.get("name", "") for s in steps]
-    assert any("Build sdk" in n for n in names)
-    assert any("Build server" in n for n in names)
-    assert any("Publish sdk" in n for n in names)
-    assert any("Publish server" in n for n in names)
+    # Two separate jobs so GitHub Environments can scope OIDC claims
+    # per PyPI trusted publisher.
+    sdk_job = data["jobs"]["pypi-sdk"]
+    server_job = data["jobs"]["pypi-server"]
+    assert sdk_job["environment"] == "pypi-sdk"
+    assert server_job["environment"] == "pypi-server"
+    sdk_names = [s.get("name", "") for s in sdk_job["steps"]]
+    server_names = [s.get("name", "") for s in server_job["steps"]]
+    assert any("Build sdk" in n for n in sdk_names)
+    assert any("Publish sdk" in n for n in sdk_names)
+    assert any("Build server" in n for n in server_names)
+    assert any("Publish server" in n for n in server_names)
 
 
 def test_release_workflow_signs_and_sboms():

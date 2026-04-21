@@ -7,8 +7,12 @@ permissions:
   id-token: write
   packages: write
 jobs:
-  pypi:
+  pypi-sdk:
     runs-on: ubuntu-latest
+    environment: pypi-sdk
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
@@ -17,11 +21,24 @@ jobs:
       - run: uv pip install build
       - name: Build sdk
         run: uv run python -m build packages/sdk --outdir dist-sdk
-      - name: Build server
-        run: uv run python -m build packages/server --outdir dist-server
       - name: Publish sdk
         uses: pypa/gh-action-pypi-publish@release/v1
         with: { packages-dir: dist-sdk }
+
+  pypi-server:
+    runs-on: ubuntu-latest
+    environment: pypi-server
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv python install 3.11
+      - run: uv venv
+      - run: uv pip install build
+      - name: Build server
+        run: uv run python -m build packages/server --outdir dist-server
       - name: Publish server
         uses: pypa/gh-action-pypi-publish@release/v1
         with: { packages-dir: dist-server }
