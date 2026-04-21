@@ -20,7 +20,8 @@ dependencies = [
 dev = [
   "pytest>=8.2",
   "pytest-asyncio>=0.23",
-  "fastmcp>=3.0",       # only for integration tests of instrument()
+  "fastmcp>=3.0",                # only for integration tests of instrument()
+  "opentelemetry-sdk>=1.25",     # for in-memory span exporter in tracing tests
 ]
 
 [build-system]
