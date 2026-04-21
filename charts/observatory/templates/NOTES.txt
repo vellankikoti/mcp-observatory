@@ -1,0 +1,14 @@
+Thanks for installing {{ .Chart.Name }} v{{ .Chart.AppVersion }}.
+
+This v0.1.0 chart provides only RBAC scaffolding (ServiceAccount +
+ClusterRole + ClusterRoleBinding).
+
+Plan 6 adds HTTP transport and a full Deployment resource so that
+observatory can be run persistently in-cluster. Until then, use the
+CLI or MCP server locally:
+
+  uvx mcp-observatory list-mcp-servers --prom-url http://prometheus:9090
+  uvx mcp-observatory serve-mcp
+
+NOTE: The Deployment template is intentionally omitted in v0.1.0.
+      See values.yaml comment "Plan 6 adds HTTP transport" for context.

@@ -1,0 +1,36 @@
+image:
+  repository: ghcr.io/vellankikoti/mcp-observatory
+  tag: "v0.1.0"
+  pullPolicy: IfNotPresent
+  imagePullSecrets: []
+
+# Plan 6 adds HTTP transport and a real Deployment.
+# For v0.1.0 only RBAC + ServiceAccount are shipped.
+# httpTransport: false  # placeholder — enabled in Plan 6
+
+prometheus:
+  url: "http://prometheus-operated:9090"
+
+llm:
+  offline: true
+  provider: ""
+  baseUrl: ""
+  secretName: ""
+  secretKey: "api-key"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+serviceAccount:
+  create: true
+  annotations: {}
+
+rbac:
+  create: true
+
+nameOverride: ""
+fullnameOverride: ""

@@ -1,0 +1,13 @@
+apiVersion: v2
+name: observatory
+description: MCP Observatory — observe distributed MCP server fleets from Prometheus.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/vellankikoti/mcp-observatory
+sources:
+  - https://github.com/vellankikoti/mcp-observatory
+maintainers:
+  - name: vellankikoti
+    email: vellankikoti@gmail.com
+kubeVersion: ">=1.26.0-0"
