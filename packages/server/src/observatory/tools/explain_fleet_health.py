@@ -5,7 +5,12 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from observatory.core.context import GuardedContext
-from observatory.core.models import Capability, FleetHealthExplanation
+from observatory.core.models import (
+    AbandonmentSignal,
+    Capability,
+    FleetHealth,
+    FleetHealthExplanation,
+)
 from observatory.core.tracing import tracer
 from observatory.rules.abandonment import detect
 from observatory.tools.get_fleet_health import get_fleet_health
@@ -22,7 +27,11 @@ class _ExplanationLLMOutput(BaseModel):
     recommendations: list[str] = Field(description="Concrete next actions for SRE on-call.")
 
 
-def _deterministic(fleet, abandoned_signals, servers) -> FleetHealthExplanation:
+def _deterministic(
+    fleet: FleetHealth,
+    abandoned_signals: list[AbandonmentSignal],
+    servers: list[str],
+) -> FleetHealthExplanation:
     reasons: list[str] = ["LLM unavailable — deterministic summary"]
     confirmed = sum(1 for s in abandoned_signals if s.status == "confirmed")
     suspected = sum(1 for s in abandoned_signals if s.status == "suspected")
