@@ -35,6 +35,8 @@ def test_help_mentions_all_commands() -> None:
         "get-fleet-health",
         "explain-fleet-health",
         "serve-mcp",
+        "serve-http",
+        "verify-services",
     ):
         assert cmd.replace("-", "") in out.replace("-", "")
 
@@ -90,3 +92,18 @@ def test_detect_tool_abandonment_help_has_expected_flags() -> None:
     assert "service" in collapsed
     assert "tool" in collapsed
     assert "drop" in collapsed
+
+
+def test_serve_http_help_has_port_flag() -> None:
+    result = runner.invoke(app, ["serve-http", "--help"])
+    assert result.exit_code == 0
+    collapsed = _plain(result.output)
+    assert "port" in collapsed
+
+
+def test_verify_services_help_has_expected_flag() -> None:
+    result = runner.invoke(app, ["verify-services", "--help"])
+    assert result.exit_code == 0
+    collapsed = _plain(result.output)
+    assert "expected" in collapsed
+    assert "window" in collapsed

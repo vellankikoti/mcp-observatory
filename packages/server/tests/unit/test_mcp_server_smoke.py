@@ -17,4 +17,5 @@ def test_mcp_server_exposes_expected_tools() -> None:
     assert "detect_tool_abandonment" in names
     assert "get_fleet_health" in names
     assert "explain_fleet_health" in names
-    assert len(names) >= 8
+    assert "verify_services" in names
+    assert len(names) >= 9

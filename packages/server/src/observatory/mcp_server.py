@@ -30,6 +30,9 @@ from observatory.tools.get_tool_latency_p99 import NEEDS as GET_LATENCY_NEEDS
 from observatory.tools.get_tool_latency_p99 import get_tool_latency_p99 as _get_tool_latency_p99
 from observatory.tools.list_mcp_servers import NEEDS as LIST_SERVERS_NEEDS
 from observatory.tools.list_mcp_servers import list_mcp_servers as _list_mcp_servers
+from observatory.tools.verify_services import NEEDS as VERIFY_SERVICES_NEEDS
+from observatory.tools.verify_services import ServiceVerification
+from observatory.tools.verify_services import verify_services as _verify_services
 
 _DEFAULT_PROM_URL = "http://localhost:9090"
 
@@ -119,6 +122,15 @@ def build_server() -> FastMCP:
         """Synthesise a fleet-wide health narrative using LLM (with deterministic fallback)."""
         ctx = _build_ctx().guard(needs=EXPLAIN_FLEET_NEEDS)
         return await _explain_fleet_health(ctx)
+
+    @server.tool(name="verify_services")
+    async def verify_services_tool(
+        expected: list[str],
+        window: str = "24h",
+    ) -> ServiceVerification:
+        """Check which expected MCP service names are visible in Prometheus metrics."""
+        ctx = _build_ctx().guard(needs=VERIFY_SERVICES_NEEDS)
+        return await _verify_services(ctx, expected=expected, window=window)
 
     return server
 

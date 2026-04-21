@@ -28,6 +28,8 @@ from observatory.tools.get_tool_latency_p99 import NEEDS as GET_LATENCY_NEEDS
 from observatory.tools.get_tool_latency_p99 import get_tool_latency_p99 as _get_tool_latency_p99
 from observatory.tools.list_mcp_servers import NEEDS as LIST_SERVERS_NEEDS
 from observatory.tools.list_mcp_servers import list_mcp_servers as _list_mcp_servers
+from observatory.tools.verify_services import NEEDS as VERIFY_SERVICES_NEEDS
+from observatory.tools.verify_services import verify_services as _verify_services
 
 app = typer.Typer(
     add_completion=False,
@@ -220,12 +222,52 @@ def explain_fleet_health_cmd(
     raise typer.Exit(asyncio.run(_go()))
 
 
+@app.command("verify-services")
+def verify_services_cmd(
+    expected: str = typer.Option(
+        ..., "--expected", "-e", help="Comma-separated list of expected service names"
+    ),
+    window: str = typer.Option("24h", "--window", "-w", help="Look-back window (e.g. 1h, 24h, 7d)"),
+    prom_url: str | None = typer.Option(None, "--prom-url", help="Prometheus base URL"),
+    fmt: str = typer.Option("json", "--format", "-f", help="Output format: json or md"),
+) -> None:
+    """Check which expected MCP service names are visible in Prometheus (exits 1 when services missing)."""
+
+    async def _go() -> int:
+        ctx = _build_ctx(prom_url).guard(needs=VERIFY_SERVICES_NEEDS)
+        expected_list = [s.strip() for s in expected.split(",") if s.strip()]
+        result = await _verify_services(ctx, expected=expected_list, window=window)
+        sys.stdout.write(_render(result, fmt))
+        return 0 if result.ok else 1
+
+    raise typer.Exit(asyncio.run(_go()))
+
+
 @app.command("serve-mcp")
 def serve_mcp() -> None:
     """Run the MCP stdio server."""
     from observatory.mcp_server import run_stdio
 
     run_stdio()
+
+
+@app.command("serve-http")
+def serve_http_cmd(
+    port: int = typer.Option(8000, "--port", help="HTTP port to bind to"),
+    prom_url: str | None = typer.Option(None, "--prom-url", help="Prometheus base URL"),
+    offline: bool = typer.Option(False, "--no-llm", help="Disable LLM (offline mode)"),
+) -> None:
+    """Run the MCP server with HTTP transport (for in-cluster use)."""
+    import os
+
+    if prom_url:
+        os.environ.setdefault("OBSERVATORY_PROM_URL", prom_url)
+    if offline:
+        os.environ.setdefault("OBSERVATORY_LLM_PROVIDER", "offline")
+
+    from observatory.mcp_server import build_server
+
+    build_server().run(transport="http", port=port, show_banner=False)
 
 
 if __name__ == "__main__":
