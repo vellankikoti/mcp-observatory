@@ -1,27 +1,13 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 from observatory.core.context import GuardedContext
 from observatory.core.models import Capability, TimeSeries
 from observatory.core.tracing import tracer
+from observatory.tools._util import _parse_window
 
 NEEDS = frozenset({Capability.PROM})
-
-_WINDOW_RE = __import__("re").compile(r"^(?P<n>\d+)(?P<unit>[smhd])$")
-
-
-def _parse_window(window: str) -> timedelta:
-    m = _WINDOW_RE.match(window)
-    if m is None:
-        raise ValueError(f"invalid window: {window}")
-    n = int(m.group("n"))
-    return {
-        "s": timedelta(seconds=n),
-        "m": timedelta(minutes=n),
-        "h": timedelta(hours=n),
-        "d": timedelta(days=n),
-    }[m.group("unit")]
 
 
 async def get_tool_call_rate(
