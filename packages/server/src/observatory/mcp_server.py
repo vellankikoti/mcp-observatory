@@ -5,9 +5,13 @@ from fastmcp import FastMCP
 from observatory.adapters.llm import LLMAdapter, LLMConfig
 from observatory.adapters.prom import PromAdapter, PromConfig
 from observatory.core.context import ObservatoryContext
-from observatory.core.models import ServerComparison, TimeSeries
+from observatory.core.models import AbandonmentSignal, ServerComparison, TimeSeries
 from observatory.tools.compare_servers import NEEDS as COMPARE_NEEDS
 from observatory.tools.compare_servers import compare_servers as _compare_servers
+from observatory.tools.detect_tool_abandonment import NEEDS as DETECT_ABANDONMENT_NEEDS
+from observatory.tools.detect_tool_abandonment import (
+    detect_tool_abandonment as _detect_tool_abandonment,
+)
 from observatory.tools.get_tool_call_rate import NEEDS as GET_RATE_NEEDS
 from observatory.tools.get_tool_call_rate import get_tool_call_rate as _get_tool_call_rate
 from observatory.tools.get_tool_error_rate import NEEDS as GET_ERROR_RATE_NEEDS
@@ -74,6 +78,25 @@ def build_server() -> FastMCP:
         """Compare two MCP services by tool count, error rate, and p99 latency."""
         ctx = _build_ctx().guard(needs=COMPARE_NEEDS)
         return await _compare_servers(ctx, service_a=service_a, service_b=service_b, window=window)
+
+    @server.tool(name="detect_tool_abandonment")
+    async def detect_tool_abandonment_tool(
+        service: str | None = None,
+        tool: str | None = None,
+        drop_pct: float = 80.0,
+        baseline_min_rate: float = 0.1,
+        error_rate_floor: float = 0.01,
+    ) -> list[AbandonmentSignal]:
+        """Detect tools that agents may have silently stopped using."""
+        ctx = _build_ctx().guard(needs=DETECT_ABANDONMENT_NEEDS)
+        return await _detect_tool_abandonment(
+            ctx,
+            service=service,
+            tool=tool,
+            drop_pct=drop_pct,
+            baseline_min_rate=baseline_min_rate,
+            error_rate_floor=error_rate_floor,
+        )
 
     return server
 

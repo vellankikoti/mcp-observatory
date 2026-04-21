@@ -18,7 +18,11 @@ def _discover() -> list[tuple[str, str]]:
         for scenario_dir in sorted(tool_dir.iterdir()):
             if not scenario_dir.is_dir():
                 continue
-            if (scenario_dir / "input_prom.json").exists() and (scenario_dir / "expected.json").exists() and (scenario_dir / "meta.json").exists():
+            if (
+                (scenario_dir / "input_prom.json").exists()
+                and (scenario_dir / "expected.json").exists()
+                and (scenario_dir / "meta.json").exists()
+            ):
                 out.append((tool_dir.name, scenario_dir.name))
     return out
 
@@ -40,6 +44,10 @@ async def test_golden_scenario(tool_name: str, scenario: str) -> None:
     # Convert pydantic/dataclass to JSON-native for diff
     if hasattr(actual, "model_dump"):
         actual_data = actual.model_dump(mode="json")
+    elif isinstance(actual, list):
+        actual_data = [
+            item.model_dump(mode="json") if hasattr(item, "model_dump") else item for item in actual
+        ]
     else:
         actual_data = actual
     actual_norm = normalise(actual_data)

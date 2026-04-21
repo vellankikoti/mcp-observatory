@@ -1,0 +1,28 @@
+{
+  "queries": [
+    {
+      "match": "[50m:5m]",
+      "response": {"result": []}
+    },
+    {
+      "match": "outcome=\"error\"",
+      "response": {"result": []}
+    },
+    {
+      "match": "[7d:10m])",
+      "response": {
+        "result": [
+          {"metric": {"service": "s", "tool": "t"}, "value": [0, "2.0"]}
+        ]
+      }
+    },
+    {
+      "match": "[1h])",
+      "response": {
+        "result": [
+          {"metric": {"service": "s", "tool": "t"}, "value": [0, "0.1"]}
+        ]
+      }
+    }
+  ]
+}

@@ -2,13 +2,13 @@
 
 > Production-grade observability for distributed MCP server fleets.
 
-**Status:** v0.2.0 — 5 query tools live (error rate, p99 latency, server comparison added).
+**Status:** v0.3.0 — 6 tools live. Hero feature `detect_tool_abandonment` now available: detects tools agents may have silently stopped using by comparing 7-day baseline rates against 1-hour current rates, with error-spike correlation to distinguish confirmed abandonment from suspected drops.
 
 ## Packages
 
 | Package | PyPI name | Description |
 |---------|-----------|-------------|
-| `packages/server` | `mcp-observatory` | MCP query router — 5 query tools, Typer CLI, FastMCP stdio surface |
+| `packages/server` | `mcp-observatory` | MCP query router — 6 query tools, Typer CLI, FastMCP stdio surface |
 | `packages/sdk` | `mcp-observatory-sdk` | Tiny SDK: `instrument(server)`, Prometheus metrics, OTel spans, ASGI `/metrics` |
 
 ## Install
@@ -40,6 +40,10 @@ observatory get-tool-latency-p99 my-service --tool my_tool --window 1h --prom-ur
 
 # Compare two services side-by-side
 observatory compare-servers svc-a svc-b --window 1h --prom-url http://localhost:9090
+
+# Detect silently abandoned tools (hero feature — v0.3.0)
+observatory detect-tool-abandonment --prom-url http://localhost:9090
+observatory detect-tool-abandonment --service my-service --drop-pct 70 --prom-url http://localhost:9090
 
 # Run as MCP stdio server (for Claude Desktop / any MCP client)
 observatory serve-mcp
@@ -103,7 +107,7 @@ record_tool_call(
 uv venv
 uv pip install -e "packages/sdk[dev]" -e "packages/server[dev]"
 
-# Unit tests (26)
+# Unit tests (60 total)
 uv run pytest packages/server/tests packages/sdk/tests -q
 
 # Golden tests — no cluster needed (3)
@@ -119,8 +123,8 @@ uv run pytest -m mcp_contract -v
 ## Docker
 
 ```bash
-docker pull ghcr.io/vellankikoti/mcp-observatory:v0.2.0
-docker run --rm ghcr.io/vellankikoti/mcp-observatory:v0.2.0 list-mcp-servers --help
+docker pull ghcr.io/vellankikoti/mcp-observatory:v0.3.0
+docker run --rm ghcr.io/vellankikoti/mcp-observatory:v0.3.0 list-mcp-servers --help
 ```
 
 ## Helm

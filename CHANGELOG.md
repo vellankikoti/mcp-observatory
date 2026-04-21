@@ -3,6 +3,19 @@
 All notable changes to this project will be documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0] — 2026-04-20 — detect_tool_abandonment (hero feature)
+
+### Added
+- `detect_tool_abandonment(service?, tool?, drop_pct, baseline_min_rate, error_rate_floor)` — hero feature that detects tools agents may have silently stopped using.
+- `rules/abandonment.py` — standalone detection algorithm using four PromQL queries: 7d baseline rate, 1h current rate, 50m error spike, 7d baseline error rate.
+- `AbandonmentThresholds` dataclass with configurable `drop_pct` (default 80%), `baseline_min_rate` (default 0.1 rps), and `error_rate_floor` (default 0.01 rps).
+- Signals return `status="suspected"` (drop without error spike) or `status="confirmed"` (drop correlated with error spike ≥ 2× baseline).
+- CLI subcommand `detect-tool-abandonment` with `--service`, `--tool`, `--drop-pct`, `--baseline-min`, `--error-floor` flags (6 subcommands total).
+- MCP stdio server now exposes 6 tools (up from 5).
+- Enhanced `FakePromAdapter` in the golden test runner to support substring-keyed `"queries"` array in `input_prom.json` (legacy `"query"` key still works).
+- 2 new golden scenarios: `detect_tool_abandonment/two-suspected` and `detect_tool_abandonment/none-because-baseline-too-low`.
+- 7 new unit tests: 5 rule tests + 2 tool-wrapper tests (60 total, up from 50).
+
 ## [0.2.0] — 2026-04-20 — 3 more query tools
 
 ### Added

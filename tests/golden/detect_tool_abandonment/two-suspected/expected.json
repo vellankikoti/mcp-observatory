@@ -1,0 +1,22 @@
+[
+  {
+    "service": "s",
+    "tool": "t",
+    "status": "suspected",
+    "baseline_rate": 2.0,
+    "current_rate": 0.1,
+    "drop_pct": 95.0,
+    "error_spike_at": null,
+    "receipts": {
+      "baseline_rate": 2.0,
+      "current_rate": 0.1,
+      "error_spike": 0.0,
+      "baseline_error_rate": 0.0,
+      "thresholds": {
+        "drop_pct": 80.0,
+        "baseline_min_rate": 0.1,
+        "error_rate_floor": 0.01
+      }
+    }
+  }
+]

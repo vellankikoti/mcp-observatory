@@ -31,6 +31,7 @@ def test_help_mentions_all_commands() -> None:
         "get-tool-error-rate",
         "get-tool-latency-p99",
         "compare-servers",
+        "detect-tool-abandonment",
         "serve-mcp",
     ):
         assert cmd.replace("-", "") in out.replace("-", "")
@@ -78,3 +79,12 @@ def test_compare_servers_help_has_service_a_b_flags() -> None:
     collapsed = _plain(result.output)
     assert "service" in collapsed
     assert "window" in collapsed
+
+
+def test_detect_tool_abandonment_help_has_expected_flags() -> None:
+    result = runner.invoke(app, ["detect-tool-abandonment", "--help"])
+    assert result.exit_code == 0
+    collapsed = _plain(result.output)
+    assert "service" in collapsed
+    assert "tool" in collapsed
+    assert "drop" in collapsed

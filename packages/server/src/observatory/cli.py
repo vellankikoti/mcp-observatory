@@ -12,6 +12,10 @@ from observatory.reports.json import render_json
 from observatory.reports.markdown import render_markdown
 from observatory.tools.compare_servers import NEEDS as COMPARE_NEEDS
 from observatory.tools.compare_servers import compare_servers as _compare_servers
+from observatory.tools.detect_tool_abandonment import NEEDS as DETECT_ABANDONMENT_NEEDS
+from observatory.tools.detect_tool_abandonment import (
+    detect_tool_abandonment as _detect_tool_abandonment,
+)
 from observatory.tools.get_tool_call_rate import NEEDS as GET_RATE_NEEDS
 from observatory.tools.get_tool_call_rate import get_tool_call_rate as _get_tool_call_rate
 from observatory.tools.get_tool_error_rate import NEEDS as GET_ERROR_RATE_NEEDS
@@ -137,6 +141,40 @@ def compare_servers_cmd(
             ctx, service_a=service_a, service_b=service_b, window=window
         )
         sys.stdout.write(_render(comparison, fmt))
+        return 0
+
+    raise typer.Exit(asyncio.run(_go()))
+
+
+@app.command("detect-tool-abandonment")
+def detect_tool_abandonment_cmd(
+    service: str | None = typer.Option(
+        None, "--service", "-s", help="Filter to a specific service name"
+    ),
+    tool: str | None = typer.Option(None, "--tool", "-t", help="Filter to a specific tool name"),
+    drop_pct: float = typer.Option(80.0, "--drop-pct", help="Minimum drop %% to flag as candidate"),
+    baseline_min: float = typer.Option(
+        0.1, "--baseline-min", help="Minimum baseline rate to be considered active"
+    ),
+    error_floor: float = typer.Option(
+        0.01, "--error-floor", help="Minimum error rate to consider an error spike real"
+    ),
+    prom_url: str | None = typer.Option(None, "--prom-url", help="Prometheus base URL"),
+    fmt: str = typer.Option("json", "--format", "-f", help="Output format: json or md"),
+) -> None:
+    """Detect tools that agents may have silently stopped using (tool-abandonment detector)."""
+
+    async def _go() -> int:
+        ctx = _build_ctx(prom_url).guard(needs=DETECT_ABANDONMENT_NEEDS)
+        signals = await _detect_tool_abandonment(
+            ctx,
+            service=service,
+            tool=tool,
+            drop_pct=drop_pct,
+            baseline_min_rate=baseline_min,
+            error_rate_floor=error_floor,
+        )
+        sys.stdout.write(_render(signals, fmt))
         return 0
 
     raise typer.Exit(asyncio.run(_go()))

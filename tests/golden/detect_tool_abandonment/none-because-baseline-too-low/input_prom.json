@@ -1,0 +1,16 @@
+{
+  "queries": [
+    {
+      "match": "[7d:10m])",
+      "response": {
+        "result": [
+          {"metric": {"service": "s", "tool": "t"}, "value": [0, "0.01"]}
+        ]
+      }
+    },
+    {
+      "match": "[1h])",
+      "response": {"result": []}
+    }
+  ]
+}
