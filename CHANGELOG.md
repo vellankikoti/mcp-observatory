@@ -3,6 +3,21 @@
 All notable changes to this project will be documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.0] — 2026-04-21 — production-ready
+
+### Added
+- `verify_services(expected, window)` — 9th tool; checks which expected MCP service names are visible in Prometheus; exits 1 when any are missing (CI gate for MCP deployments). `ServiceVerification` model with `ok`, `missing`, `unexpected` fields.
+- CLI subcommand `verify-services --expected a,b,c` (exits 0/1 accordingly).
+- CLI subcommand `serve-http --port 8000` — HTTP transport for in-cluster use (FastMCP 3.x `run(transport="http", port=...)`).
+- Helm `Deployment` — runs `observatory serve-http`, readOnlyRootFilesystem + non-root securityContext, pod annotations for Prometheus scraping.
+- Helm `Service` — ClusterIP on port 8000 (`targetPort: http`).
+- Cluster matrix CI (`.github/workflows/cluster-matrix.yml`) — Pulumi EKS + GKE + AKS ephemeral stacks; `workflow_dispatch` + weekly Monday schedule; full 9-tool golden + integration + mcp_contract suite per cloud.
+- `infra/pulumi/{eks,gke,aks}/` — Pulumi TypeScript stacks for ephemeral K8s clusters (adapted from mcp-deploy-intel).
+- `docs/sdk-integration.md` — how to adopt `mcp-observatory-sdk` in any FastMCP server; 2-line integration, worked prod-readiness diff, Prometheus metrics + OTel spans reference, ServiceMonitor + scrape_config examples, troubleshooting.
+- `docs/workshop.md` — 4-module workshop (2h 15m): install + 9 tools (30m), simulate abandonment (45m), SDK adoption (45m), Helm deploy (15m).
+- Both packages: `Development Status :: 3 - Alpha` → `5 - Production/Stable`.
+- `Chart.yaml` `appVersion` bumped to `1.0.0`.
+
 ## [0.4.0] — 2026-04-20 — fleet_health + explain_fleet_health (8 tools live)
 
 ### Added

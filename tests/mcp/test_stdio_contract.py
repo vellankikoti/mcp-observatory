@@ -17,7 +17,10 @@ async def _readline_timeout(reader: asyncio.StreamReader, deadline_s: float = 15
 @pytest.mark.asyncio
 async def test_mcp_tools_list_over_stdio() -> None:
     proc = await asyncio.create_subprocess_exec(
-        sys.executable, "-m", "observatory.cli", "serve-mcp",
+        sys.executable,
+        "-m",
+        "observatory.cli",
+        "serve-mcp",
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
@@ -25,8 +28,16 @@ async def test_mcp_tools_list_over_stdio() -> None:
     )
     assert proc.stdin is not None and proc.stdout is not None
     try:
-        init = {"jsonrpc": "2.0", "id": 1, "method": "initialize",
-                "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "t", "version": "0"}}}
+        init = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {},
+                "clientInfo": {"name": "t", "version": "0"},
+            },
+        }
         proc.stdin.write((json.dumps(init) + "\n").encode())
         await proc.stdin.drain()
         _ = await _readline_timeout(proc.stdout)

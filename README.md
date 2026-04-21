@@ -2,51 +2,118 @@
 
 > Production-grade observability for distributed MCP server fleets.
 
-**Status:** v0.4.0 — 8 tools live. Latest additions: `get_fleet_health` (fleet-wide health aggregation with per-server healthy/degraded/abandoned counts) and `explain_fleet_health` (LLM-driven narrative with deterministic fallback).
+**Status:** v1.0.0 — production-ready. 9 tools live. HTTP transport. Helm Deployment + Service.
+
+[![PyPI](https://img.shields.io/pypi/v/mcp-observatory)](https://pypi.org/project/mcp-observatory/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+
+---
 
 ## Packages
 
 | Package | PyPI name | Description |
 |---------|-----------|-------------|
-| `packages/server` | `mcp-observatory` | MCP query router — 8 query tools, Typer CLI, FastMCP stdio surface |
+| `packages/server` | `mcp-observatory` | MCP query router — 9 tools, Typer CLI, FastMCP stdio + HTTP surfaces |
 | `packages/sdk` | `mcp-observatory-sdk` | Tiny SDK: `instrument(server)`, Prometheus metrics, OTel spans, ASGI `/metrics` |
 
+---
+
+## 9 Tools
+
+| Tool | CLI subcommand | Description |
+|------|---------------|-------------|
+| `list_mcp_servers` | `list-mcp-servers` | Unique MCP server service names seen in Prom over a window |
+| `get_tool_call_rate` | `get-tool-call-rate` | Call-rate TimeSeries for a service (optionally filtered by tool) |
+| `get_tool_error_rate` | `get-tool-error-rate` | Error-rate TimeSeries (ratio errors/total) |
+| `get_tool_latency_p99` | `get-tool-latency-p99` | p99 latency TimeSeries via `histogram_quantile` |
+| `compare_servers` | `compare-servers` | Side-by-side comparison of two services |
+| `detect_tool_abandonment` | `detect-tool-abandonment` | Detect silently abandoned tools — `suspected` / `confirmed` |
+| `get_fleet_health` | `get-fleet-health` | Fleet-wide health snapshot with per-server healthy/degraded/abandoned counts |
+| `explain_fleet_health` | `explain-fleet-health` | LLM-driven narrative with deterministic fallback |
+| `verify_services` | `verify-services` | Check expected services are present — exits 1 if any missing (CI gate) |
+
+---
+
 ## Install
+
+### A. pip
 
 ```bash
 pip install mcp-observatory mcp-observatory-sdk
 ```
 
-Or with [uv](https://github.com/astral-sh/uv):
+### B. uv
 
 ```bash
 uv add mcp-observatory mcp-observatory-sdk
 ```
 
-## Quickstart — server
+### C. uvx (no install)
 
 ```bash
-# List MCP servers seen in Prometheus over last 24h
-observatory list-mcp-servers --prom-url http://localhost:9090
+uvx mcp-observatory list-mcp-servers --prom-url http://localhost:9090
+```
 
-# Get per-tool call rate for a specific service (1h window)
-observatory get-tool-call-rate my-service --window 1h --prom-url http://localhost:9090
+### D. Docker
 
-# Get error rate for a service (ratio of error calls to total)
-observatory get-tool-error-rate my-service --window 1h --prom-url http://localhost:9090
+```bash
+docker pull ghcr.io/vellankikoti/mcp-observatory:v1.0.0
+docker run --rm ghcr.io/vellankikoti/mcp-observatory:v1.0.0 list-mcp-servers --help
+```
 
-# Get p99 latency for a specific tool on a service
-observatory get-tool-latency-p99 my-service --tool my_tool --window 1h --prom-url http://localhost:9090
+### E. Helm (in-cluster HTTP transport)
 
-# Compare two services side-by-side
-observatory compare-servers svc-a svc-b --window 1h --prom-url http://localhost:9090
+```bash
+helm repo add observatory https://vellankikoti.github.io/mcp-observatory
+helm install obs observatory/observatory \
+  --namespace obs \
+  --create-namespace \
+  --set prometheus.url=http://prometheus.monitoring.svc.cluster.local:9090
+```
 
-# Detect silently abandoned tools (hero feature — v0.3.0)
-observatory detect-tool-abandonment --prom-url http://localhost:9090
-observatory detect-tool-abandonment --service my-service --drop-pct 70 --prom-url http://localhost:9090
+The chart deploys a `Deployment` running `observatory serve-http --port 8000`
+and a `ClusterIP` Service. Access from within the cluster:
+`http://obs-observatory.obs.svc.cluster.local:8000/mcp/`
 
-# Run as MCP stdio server (for Claude Desktop / any MCP client)
+---
+
+## Quickstart — CLI
+
+```bash
+export OBSERVATORY_PROM_URL=http://localhost:9090
+
+# List active MCP servers
+observatory list-mcp-servers --window 24h
+
+# Tool call rate (1h window)
+observatory get-tool-call-rate my-service --window 1h
+
+# Error rate
+observatory get-tool-error-rate my-service --window 1h
+
+# p99 latency filtered to one tool
+observatory get-tool-latency-p99 my-service --tool my_tool --window 1h
+
+# Compare two services
+observatory compare-servers svc-a svc-b --window 1h
+
+# Detect silently abandoned tools
+observatory detect-tool-abandonment
+
+# Fleet-wide health snapshot
+observatory get-fleet-health --window 24h
+
+# LLM narrative (deterministic fallback when no LLM configured)
+observatory explain-fleet-health
+
+# CI gate — exits 1 if prod-readiness or search-service are absent
+observatory verify-services --expected prod-readiness,search-service && echo "all present"
+
+# Run as MCP stdio server (Claude Desktop / any MCP client)
 observatory serve-mcp
+
+# Run as MCP HTTP server (in-cluster, port 8000)
+observatory serve-http --port 8000 --prom-url http://prometheus:9090 --no-llm
 ```
 
 ### MCP client config (Claude Desktop)
@@ -65,41 +132,78 @@ observatory serve-mcp
 }
 ```
 
-## Quickstart — SDK
+---
 
-Instrument any [FastMCP](https://github.com/jlowin/fastmcp) server with one line:
+## SDK integration
 
-```python
-from mcp_observatory_sdk import instrument
-
-from myfastmcp_app import mcp   # your FastMCP instance
-
-instrument(mcp, service_name="my-service")
-```
-
-This registers Prometheus counters and OTel spans for every tool call.
-
-### Expose `/metrics` in your ASGI app
+Instrument any [FastMCP](https://github.com/jlowin/fastmcp) server with two lines:
 
 ```python
-from mcp_observatory_sdk import metrics_asgi_app
+from fastmcp import FastMCP
+from observatory_sdk import instrument
 
-# Mount alongside your existing app
-app.mount("/metrics", metrics_asgi_app())
+server = FastMCP("my-service")
+instrument(server, service_name="my-service", prometheus_port=9090)  # ← add this
+
+@server.tool()
+async def my_tool(query: str) -> str: ...
 ```
 
-### Low-level API
+This exposes `mcp_tool_calls_total`, `mcp_tool_duration_seconds`, and
+`mcp_tool_inflight` metrics plus OTel spans — the exact names `mcp-observatory`
+queries.
 
-```python
-from mcp_observatory_sdk import record_tool_call, ToolCallOutcome
+Full guide: **[docs/sdk-integration.md](docs/sdk-integration.md)**
 
-record_tool_call(
-    service="my-service",
-    tool="my_tool",
-    outcome=ToolCallOutcome.SUCCESS,
-    duration_s=0.123,
-)
+---
+
+## LLM config
+
+`explain-fleet-health` uses an LLM for narrative synthesis with full deterministic fallback.
+
+```bash
+# Ollama (local)
+export OBSERVATORY_LLM_PROVIDER=ollama/qwen2.5:7b
+
+# Any LiteLLM-compatible provider
+export OBSERVATORY_LLM_PROVIDER=openai/gpt-4o-mini
+export OPENAI_API_KEY=sk-...
+
+# Disable LLM entirely
+observatory explain-fleet-health  # falls back automatically when no provider set
 ```
+
+---
+
+## Verify image signature (cosign)
+
+```bash
+cosign verify \
+  --certificate-identity-regexp "https://github.com/vellankikoti/mcp-observatory" \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  ghcr.io/vellankikoti/mcp-observatory:v1.0.0
+```
+
+SBOM (CycloneDX) is attached as an OCI referrer — fetch with:
+
+```bash
+cosign download sbom ghcr.io/vellankikoti/mcp-observatory:v1.0.0
+```
+
+---
+
+## Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| `list-mcp-servers` returns empty | SDK not installed on any server, or Prom doesn't scrape the metrics port |
+| `verify-services` always exits 0 | Empty `--expected` is always ok by design; pass explicit names |
+| `explain-fleet-health` returns deterministic output | Set `OBSERVATORY_LLM_PROVIDER` or `--llm-provider` |
+| Helm pod in CrashLoopBackOff | Check `kubectl logs`; `--prom-url` likely unreachable from inside cluster |
+| `serve-http` exits immediately | Port conflict or uvicorn startup error — check stderr |
+| mypy errors on `Optional` | Ensure Python 3.11+ is active (`uv python install 3.11`) |
+
+---
 
 ## Development
 
@@ -107,10 +211,10 @@ record_tool_call(
 uv venv
 uv pip install -e "packages/sdk[dev]" -e "packages/server[dev]"
 
-# Unit tests (60 total)
-uv run pytest packages/server/tests packages/sdk/tests -q
+# Run all tests (≥75)
+uv run pytest packages/server/tests packages/sdk/tests tests/ -q
 
-# Golden tests — no cluster needed (3)
+# Golden tests (≥5) — no cluster needed
 uv run pytest -m golden -v
 
 # Integration — spins up synthetic Prom (1)
@@ -118,23 +222,17 @@ uv run pytest -m integration -v
 
 # MCP stdio contract (1)
 uv run pytest -m mcp_contract -v
+
+# Helm tests (2)
+uv run pytest tests/helm/ -v
+
+# Linting + formatting
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy packages/server/src packages/sdk/src
 ```
 
-## Docker
-
-```bash
-docker pull ghcr.io/vellankikoti/mcp-observatory:v0.3.0
-docker run --rm ghcr.io/vellankikoti/mcp-observatory:v0.3.0 list-mcp-servers --help
-```
-
-## Helm
-
-```bash
-helm repo add observatory https://vellankikoti.github.io/mcp-observatory
-helm install observatory observatory/observatory --set prometheus.url=http://prometheus:9090
-```
-
-Note: v0.1.0 chart ships RBAC only. A persistent Deployment is added in Plan 6 (HTTP transport).
+---
 
 ## License
 

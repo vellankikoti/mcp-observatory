@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import asyncio
 import json
 import socket
 import subprocess
 import sys
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import ClassVar
 
 import pytest
 
@@ -18,7 +18,7 @@ def _pick_port() -> int:
 
 
 class _Handler(BaseHTTPRequestHandler):
-    CANNED = {
+    CANNED: ClassVar[dict] = {
         "result": [
             {"metric": {"service": "s1"}, "value": [0, "1"]},
             {"metric": {"service": "s2"}, "value": [0, "1"]},
@@ -49,9 +49,19 @@ def synthetic_prom():
 @pytest.mark.integration
 def test_cli_list_mcp_servers(synthetic_prom):
     result = subprocess.run(
-        [sys.executable, "-m", "observatory.cli", "list-mcp-servers",
-         "--prom-url", synthetic_prom, "--format", "json"],
-        capture_output=True, text=True, check=False,
+        [
+            sys.executable,
+            "-m",
+            "observatory.cli",
+            "list-mcp-servers",
+            "--prom-url",
+            synthetic_prom,
+            "--format",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
     )
     assert result.returncode == 0, f"stdout={result.stdout!r}\nstderr={result.stderr!r}"
     data = json.loads(result.stdout)
