@@ -1,0 +1,16 @@
+{
+  "promql": "sum(rate(mcp_tool_calls_total{service=\"prod-readiness\"}[5m]))",
+  "start": "<ts>",
+  "end": "<ts>",
+  "step_s": 15.0,
+  "samples": [
+    [
+      "<ts>",
+      2.5
+    ],
+    [
+      "<ts>",
+      3.0
+    ]
+  ]
+}

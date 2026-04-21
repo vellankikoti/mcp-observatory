@@ -1,0 +1,8 @@
+{
+  "query": {
+    "result": [
+      {"metric": {"service": "prod-readiness"}, "value": [1745280000, "100"]},
+      {"metric": {"service": "deploy-intel"}, "value": [1745280000, "50"]}
+    ]
+  }
+}

@@ -1,0 +1,1 @@
+{"tool": "get_tool_call_rate", "args": {"service": "prod-readiness", "window": "1h"}}
