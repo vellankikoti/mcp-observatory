@@ -1,0 +1,23 @@
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC", "RUF"]
+ignore = ["E501", "B008"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+plugins = ["pydantic.mypy"]
+mypy_path = ["packages/server/src", "packages/sdk/src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["packages/server/tests", "packages/sdk/tests", "tests"]
+addopts = "-ra --strict-markers"
+markers = [
+  "integration: tests requiring a synthetic Prom HTTP server",
+  "golden: golden-test scenarios (recorded Prom responses)",
+  "mcp_contract: MCP stdio contract tests",
+]
