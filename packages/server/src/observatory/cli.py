@@ -16,6 +16,10 @@ from observatory.tools.detect_tool_abandonment import NEEDS as DETECT_ABANDONMEN
 from observatory.tools.detect_tool_abandonment import (
     detect_tool_abandonment as _detect_tool_abandonment,
 )
+from observatory.tools.explain_fleet_health import NEEDS as EXPLAIN_FLEET_NEEDS
+from observatory.tools.explain_fleet_health import explain_fleet_health as _explain_fleet_health
+from observatory.tools.get_fleet_health import NEEDS as GET_FLEET_NEEDS
+from observatory.tools.get_fleet_health import get_fleet_health as _get_fleet_health
 from observatory.tools.get_tool_call_rate import NEEDS as GET_RATE_NEEDS
 from observatory.tools.get_tool_call_rate import get_tool_call_rate as _get_tool_call_rate
 from observatory.tools.get_tool_error_rate import NEEDS as GET_ERROR_RATE_NEEDS
@@ -175,6 +179,42 @@ def detect_tool_abandonment_cmd(
             error_rate_floor=error_floor,
         )
         sys.stdout.write(_render(signals, fmt))
+        return 0
+
+    raise typer.Exit(asyncio.run(_go()))
+
+
+@app.command("get-fleet-health")
+def get_fleet_health_cmd(
+    window: str = typer.Option("24h", "--window", "-w", help="Look-back window (e.g. 1h, 24h, 7d)"),
+    prom_url: str | None = typer.Option(None, "--prom-url", help="Prometheus base URL"),
+    fmt: str = typer.Option("json", "--format", "-f", help="Output format: json or md"),
+) -> None:
+    """Aggregate fleet-wide health: per-server tool counts, error rates, and p99 latency."""
+
+    async def _go() -> int:
+        ctx = _build_ctx(prom_url).guard(needs=GET_FLEET_NEEDS)
+        fleet = await _get_fleet_health(ctx, window=window)
+        sys.stdout.write(_render(fleet, fmt))
+        return 0
+
+    raise typer.Exit(asyncio.run(_go()))
+
+
+@app.command("explain-fleet-health")
+def explain_fleet_health_cmd(
+    prom_url: str | None = typer.Option(None, "--prom-url", help="Prometheus base URL"),
+    llm_provider: str | None = typer.Option(
+        None, "--llm-provider", help="LLM provider (e.g. ollama/qwen2.5:7b)"
+    ),
+    fmt: str = typer.Option("json", "--format", "-f", help="Output format: json or md"),
+) -> None:
+    """Synthesise a fleet-wide health narrative using LLM (with deterministic fallback)."""
+
+    async def _go() -> int:
+        ctx = _build_ctx(prom_url, llm_provider=llm_provider).guard(needs=EXPLAIN_FLEET_NEEDS)
+        explanation = await _explain_fleet_health(ctx)
+        sys.stdout.write(_render(explanation, fmt))
         return 0
 
     raise typer.Exit(asyncio.run(_go()))

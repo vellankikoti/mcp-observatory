@@ -32,6 +32,8 @@ def test_help_mentions_all_commands() -> None:
         "get-tool-latency-p99",
         "compare-servers",
         "detect-tool-abandonment",
+        "get-fleet-health",
+        "explain-fleet-health",
         "serve-mcp",
     ):
         assert cmd.replace("-", "") in out.replace("-", "")

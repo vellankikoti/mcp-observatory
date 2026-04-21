@@ -5,13 +5,23 @@ from fastmcp import FastMCP
 from observatory.adapters.llm import LLMAdapter, LLMConfig
 from observatory.adapters.prom import PromAdapter, PromConfig
 from observatory.core.context import ObservatoryContext
-from observatory.core.models import AbandonmentSignal, ServerComparison, TimeSeries
+from observatory.core.models import (
+    AbandonmentSignal,
+    FleetHealth,
+    FleetHealthExplanation,
+    ServerComparison,
+    TimeSeries,
+)
 from observatory.tools.compare_servers import NEEDS as COMPARE_NEEDS
 from observatory.tools.compare_servers import compare_servers as _compare_servers
 from observatory.tools.detect_tool_abandonment import NEEDS as DETECT_ABANDONMENT_NEEDS
 from observatory.tools.detect_tool_abandonment import (
     detect_tool_abandonment as _detect_tool_abandonment,
 )
+from observatory.tools.explain_fleet_health import NEEDS as EXPLAIN_FLEET_NEEDS
+from observatory.tools.explain_fleet_health import explain_fleet_health as _explain_fleet_health
+from observatory.tools.get_fleet_health import NEEDS as GET_FLEET_NEEDS
+from observatory.tools.get_fleet_health import get_fleet_health as _get_fleet_health
 from observatory.tools.get_tool_call_rate import NEEDS as GET_RATE_NEEDS
 from observatory.tools.get_tool_call_rate import get_tool_call_rate as _get_tool_call_rate
 from observatory.tools.get_tool_error_rate import NEEDS as GET_ERROR_RATE_NEEDS
@@ -97,6 +107,18 @@ def build_server() -> FastMCP:
             baseline_min_rate=baseline_min_rate,
             error_rate_floor=error_rate_floor,
         )
+
+    @server.tool(name="get_fleet_health")
+    async def get_fleet_health_tool(window: str = "24h") -> FleetHealth:
+        """Aggregate fleet-wide health: per-server tool counts, error rates, and p99 latency."""
+        ctx = _build_ctx().guard(needs=GET_FLEET_NEEDS)
+        return await _get_fleet_health(ctx, window=window)
+
+    @server.tool(name="explain_fleet_health")
+    async def explain_fleet_health_tool() -> FleetHealthExplanation:
+        """Synthesise a fleet-wide health narrative using LLM (with deterministic fallback)."""
+        ctx = _build_ctx().guard(needs=EXPLAIN_FLEET_NEEDS)
+        return await _explain_fleet_health(ctx)
 
     return server
 
