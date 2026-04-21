@@ -3,6 +3,15 @@
 All notable changes to this project will be documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.4.0] — 2026-04-20 — fleet_health + explain_fleet_health (8 tools live)
+
+### Added
+- `get_fleet_health(window)` — aggregates fleet-wide health by fanning out to `list_mcp_servers` and `detect()`, producing a `FleetHealth` with per-server `healthy_count`, `degraded_count` (suspected abandonment), `abandoned_count` (confirmed), `p99_latency_ms`, and `error_rate`. Arithmetic: `healthy = total_tools - abandoned - degraded`.
+- `explain_fleet_health()` — LLM-driven narrative synthesis with full deterministic fallback. Uses `_ExplanationLLMOutput` Pydantic model for structured output; falls back to rule-based verdicts (`healthy` / `degraded` / `partial_outage` / `unknown`) when LLM is offline or errors.
+- CLI subcommands `get-fleet-health` and `explain-fleet-health` (9 subcommands total).
+- MCP stdio server now exposes 8 tools (up from 6).
+- 10 new unit tests: 4 for `get_fleet_health` + 6 for `explain_fleet_health` (68 total, up from 58).
+
 ## [0.3.0] — 2026-04-20 — detect_tool_abandonment (hero feature)
 
 ### Added

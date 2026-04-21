@@ -2,13 +2,13 @@
 
 > Production-grade observability for distributed MCP server fleets.
 
-**Status:** v0.3.0 — 6 tools live. Hero feature `detect_tool_abandonment` now available: detects tools agents may have silently stopped using by comparing 7-day baseline rates against 1-hour current rates, with error-spike correlation to distinguish confirmed abandonment from suspected drops.
+**Status:** v0.4.0 — 8 tools live. Latest additions: `get_fleet_health` (fleet-wide health aggregation with per-server healthy/degraded/abandoned counts) and `explain_fleet_health` (LLM-driven narrative with deterministic fallback).
 
 ## Packages
 
 | Package | PyPI name | Description |
 |---------|-----------|-------------|
-| `packages/server` | `mcp-observatory` | MCP query router — 6 query tools, Typer CLI, FastMCP stdio surface |
+| `packages/server` | `mcp-observatory` | MCP query router — 8 query tools, Typer CLI, FastMCP stdio surface |
 | `packages/sdk` | `mcp-observatory-sdk` | Tiny SDK: `instrument(server)`, Prometheus metrics, OTel spans, ASGI `/metrics` |
 
 ## Install
