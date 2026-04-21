@@ -3,7 +3,7 @@ name: observatory
 description: MCP Observatory — observe distributed MCP server fleets from Prometheus.
 type: application
 version: 0.1.0
-appVersion: "0.1.0"
+appVersion: "1.0.0"
 home: https://github.com/vellankikoti/mcp-observatory
 sources:
   - https://github.com/vellankikoti/mcp-observatory

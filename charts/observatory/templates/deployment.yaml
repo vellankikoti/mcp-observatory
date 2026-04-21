@@ -1,0 +1,40 @@
+{{- if .Values.httpServer.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "observatory.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "observatory.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{- include "observatory.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "observatory.selectorLabels" . | nindent 8 }}
+      annotations: {{- toYaml .Values.podAnnotations | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "observatory.serviceAccountName" . }}
+      containers:
+        - name: observatory
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - serve-http
+            - --port={{ .Values.httpServer.port }}
+            - --prom-url={{ .Values.prometheus.url }}
+            {{- if .Values.llm.offline }}
+            - --no-llm
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.httpServer.port }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+{{- end -}}

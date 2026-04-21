@@ -1,0 +1,16 @@
+{{- if .Values.httpServer.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "observatory.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "observatory.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.httpServer.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector: {{- include "observatory.selectorLabels" . | nindent 4 }}
+{{- end -}}
