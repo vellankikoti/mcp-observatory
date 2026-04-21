@@ -11,3 +11,7 @@ def test_mcp_server_exposes_expected_tools() -> None:
     names = {t.name for t in tools}
     assert "list_mcp_servers" in names
     assert "get_tool_call_rate" in names
+    assert "get_tool_error_rate" in names
+    assert "get_tool_latency_p99" in names
+    assert "compare_servers" in names
+    assert len(names) >= 5

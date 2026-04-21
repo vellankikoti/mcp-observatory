@@ -25,7 +25,14 @@ def test_help_mentions_all_commands() -> None:
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
     out = _plain(result.output)
-    for cmd in ("list-mcp-servers", "get-tool-call-rate", "serve-mcp"):
+    for cmd in (
+        "list-mcp-servers",
+        "get-tool-call-rate",
+        "get-tool-error-rate",
+        "get-tool-latency-p99",
+        "compare-servers",
+        "serve-mcp",
+    ):
         assert cmd.replace("-", "") in out.replace("-", "")
 
 
@@ -44,4 +51,30 @@ def test_get_tool_call_rate_help_has_service_and_tool_flags() -> None:
     collapsed = _plain(result.output)
     assert "service" in collapsed
     assert "tool" in collapsed
+    assert "window" in collapsed
+
+
+def test_get_tool_error_rate_help_has_service_and_tool_flags() -> None:
+    result = runner.invoke(app, ["get-tool-error-rate", "--help"])
+    assert result.exit_code == 0
+    collapsed = _plain(result.output)
+    assert "service" in collapsed
+    assert "tool" in collapsed
+    assert "window" in collapsed
+
+
+def test_get_tool_latency_p99_help_has_service_and_tool_flags() -> None:
+    result = runner.invoke(app, ["get-tool-latency-p99", "--help"])
+    assert result.exit_code == 0
+    collapsed = _plain(result.output)
+    assert "service" in collapsed
+    assert "tool" in collapsed
+    assert "window" in collapsed
+
+
+def test_compare_servers_help_has_service_a_b_flags() -> None:
+    result = runner.invoke(app, ["compare-servers", "--help"])
+    assert result.exit_code == 0
+    collapsed = _plain(result.output)
+    assert "service" in collapsed
     assert "window" in collapsed

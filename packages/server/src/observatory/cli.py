@@ -10,8 +10,14 @@ from observatory.adapters.prom import PromAdapter, PromConfig
 from observatory.core.context import ObservatoryContext
 from observatory.reports.json import render_json
 from observatory.reports.markdown import render_markdown
+from observatory.tools.compare_servers import NEEDS as COMPARE_NEEDS
+from observatory.tools.compare_servers import compare_servers as _compare_servers
 from observatory.tools.get_tool_call_rate import NEEDS as GET_RATE_NEEDS
 from observatory.tools.get_tool_call_rate import get_tool_call_rate as _get_tool_call_rate
+from observatory.tools.get_tool_error_rate import NEEDS as GET_ERROR_RATE_NEEDS
+from observatory.tools.get_tool_error_rate import get_tool_error_rate as _get_tool_error_rate
+from observatory.tools.get_tool_latency_p99 import NEEDS as GET_LATENCY_NEEDS
+from observatory.tools.get_tool_latency_p99 import get_tool_latency_p99 as _get_tool_latency_p99
 from observatory.tools.list_mcp_servers import NEEDS as LIST_SERVERS_NEEDS
 from observatory.tools.list_mcp_servers import list_mcp_servers as _list_mcp_servers
 
@@ -72,6 +78,63 @@ def get_tool_call_rate_cmd(
         ctx = _build_ctx(prom_url).guard(needs=GET_RATE_NEEDS)
         ts = await _get_tool_call_rate(ctx, service=service, tool=tool, window=window)
         sys.stdout.write(_render(ts, fmt))
+        return 0
+
+    raise typer.Exit(asyncio.run(_go()))
+
+
+@app.command("get-tool-error-rate")
+def get_tool_error_rate_cmd(
+    service: str = typer.Argument(..., help="MCP server service name"),
+    tool: str | None = typer.Option(None, "--tool", "-t", help="Filter to a specific tool name"),
+    window: str = typer.Option("1h", "--window", "-w", help="Look-back window (e.g. 30m, 1h, 6h)"),
+    prom_url: str | None = typer.Option(None, "--prom-url", help="Prometheus base URL"),
+    fmt: str = typer.Option("json", "--format", "-f", help="Output format: json or md"),
+) -> None:
+    """Return error-rate TimeSeries (ratio of error calls to total) for an MCP service."""
+
+    async def _go() -> int:
+        ctx = _build_ctx(prom_url).guard(needs=GET_ERROR_RATE_NEEDS)
+        ts = await _get_tool_error_rate(ctx, service=service, tool=tool, window=window)
+        sys.stdout.write(_render(ts, fmt))
+        return 0
+
+    raise typer.Exit(asyncio.run(_go()))
+
+
+@app.command("get-tool-latency-p99")
+def get_tool_latency_p99_cmd(
+    service: str = typer.Argument(..., help="MCP server service name"),
+    tool: str | None = typer.Option(None, "--tool", "-t", help="Filter to a specific tool name"),
+    window: str = typer.Option("1h", "--window", "-w", help="Look-back window (e.g. 30m, 1h, 6h)"),
+    prom_url: str | None = typer.Option(None, "--prom-url", help="Prometheus base URL"),
+    fmt: str = typer.Option("json", "--format", "-f", help="Output format: json or md"),
+) -> None:
+    """Return p99 latency TimeSeries (seconds) for an MCP service via histogram_quantile."""
+
+    async def _go() -> int:
+        ctx = _build_ctx(prom_url).guard(needs=GET_LATENCY_NEEDS)
+        ts = await _get_tool_latency_p99(ctx, service=service, tool=tool, window=window)
+        sys.stdout.write(_render(ts, fmt))
+        return 0
+
+    raise typer.Exit(asyncio.run(_go()))
+
+
+@app.command("compare-servers")
+def compare_servers_cmd(
+    service_a: str = typer.Argument(..., help="First MCP server service name"),
+    service_b: str = typer.Argument(..., help="Second MCP server service name"),
+    window: str = typer.Option("1h", "--window", "-w", help="Look-back window (e.g. 30m, 1h, 6h)"),
+    prom_url: str | None = typer.Option(None, "--prom-url", help="Prometheus base URL"),
+    fmt: str = typer.Option("json", "--format", "-f", help="Output format: json or md"),
+) -> None:
+    """Compare two MCP services by tool count, error rate, and p99 latency."""
+
+    async def _go() -> int:
+        ctx = _build_ctx(prom_url).guard(needs=COMPARE_NEEDS)
+        comparison = await _compare_servers(ctx, service_a=service_a, service_b=service_b, window=window)
+        sys.stdout.write(_render(comparison, fmt))
         return 0
 
     raise typer.Exit(asyncio.run(_go()))
