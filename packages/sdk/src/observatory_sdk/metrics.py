@@ -51,9 +51,9 @@ def record_tool_call(
     duration.labels(service=service, tool=tool, outcome=outcome.value).observe(duration_s)
 
 
-_INSTRUMENTS_CACHE: "weakref.WeakKeyDictionary[CollectorRegistry, tuple[Counter, Histogram, Gauge]]" = (
-    weakref.WeakKeyDictionary()
-)
+_INSTRUMENTS_CACHE: weakref.WeakKeyDictionary[
+    CollectorRegistry, tuple[Counter, Histogram, Gauge]
+] = weakref.WeakKeyDictionary()
 
 
 def build_instruments_cached(registry: CollectorRegistry) -> tuple[Counter, Histogram, Gauge]:
