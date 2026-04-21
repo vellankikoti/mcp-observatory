@@ -2,7 +2,7 @@
 name = "mcp-observatory-server"
 version = "1.0.0"
 description = "MCP query router for observability of distributed MCP server fleets."
-readme = "../../README.md"
+readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
 authors = [{ name = "vellankikoti", email = "vellankikoti@gmail.com" }]
