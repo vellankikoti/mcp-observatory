@@ -15,7 +15,7 @@ mypy_path = ["packages/server/src", "packages/sdk/src"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["packages/server/tests", "packages/sdk/tests", "tests"]
-addopts = "-ra --strict-markers"
+addopts = "-ra --strict-markers --import-mode=importlib"
 markers = [
   "integration: tests requiring a synthetic Prom HTTP server",
   "golden: golden-test scenarios (recorded Prom responses)",

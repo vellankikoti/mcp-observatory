@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import weakref
 from enum import StrEnum
 
 from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram
@@ -50,11 +51,14 @@ def record_tool_call(
     duration.labels(service=service, tool=tool, outcome=outcome.value).observe(duration_s)
 
 
-_INSTRUMENTS_CACHE: dict[int, tuple[Counter, Histogram, Gauge]] = {}
+_INSTRUMENTS_CACHE: "weakref.WeakKeyDictionary[CollectorRegistry, tuple[Counter, Histogram, Gauge]]" = (
+    weakref.WeakKeyDictionary()
+)
 
 
 def build_instruments_cached(registry: CollectorRegistry) -> tuple[Counter, Histogram, Gauge]:
-    k = id(registry)
-    if k not in _INSTRUMENTS_CACHE:
-        _INSTRUMENTS_CACHE[k] = build_instruments(registry)
-    return _INSTRUMENTS_CACHE[k]
+    cached = _INSTRUMENTS_CACHE.get(registry)
+    if cached is None:
+        cached = build_instruments(registry)
+        _INSTRUMENTS_CACHE[registry] = cached
+    return cached
