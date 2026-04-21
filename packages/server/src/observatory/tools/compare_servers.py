@@ -44,18 +44,14 @@ async def compare_servers(
             f'sum(rate(mcp_tool_calls_total{{service="{service_a}",outcome="error"}}[5m])) '
             f'/ sum(rate(mcp_tool_calls_total{{service="{service_a}"}}[5m]))'
         )
-        p99_a_q = (
-            f'histogram_quantile(0.99, sum by (le)(rate(mcp_tool_duration_seconds_bucket{{service="{service_a}"}}[5m]))) * 1000'
-        )
+        p99_a_q = f'histogram_quantile(0.99, sum by (le)(rate(mcp_tool_duration_seconds_bucket{{service="{service_a}"}}[5m]))) * 1000'
 
         tools_b_q = f'count(count by (tool)(mcp_tool_calls_total{{service="{service_b}"}}))'
         err_b_q = (
             f'sum(rate(mcp_tool_calls_total{{service="{service_b}",outcome="error"}}[5m])) '
             f'/ sum(rate(mcp_tool_calls_total{{service="{service_b}"}}[5m]))'
         )
-        p99_b_q = (
-            f'histogram_quantile(0.99, sum by (le)(rate(mcp_tool_duration_seconds_bucket{{service="{service_b}"}}[5m]))) * 1000'
-        )
+        p99_b_q = f'histogram_quantile(0.99, sum by (le)(rate(mcp_tool_duration_seconds_bucket{{service="{service_b}"}}[5m]))) * 1000'
 
         data = await asyncio.gather(
             ctx.prom.query(tools_a_q),

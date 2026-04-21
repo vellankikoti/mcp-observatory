@@ -133,7 +133,9 @@ def compare_servers_cmd(
 
     async def _go() -> int:
         ctx = _build_ctx(prom_url).guard(needs=COMPARE_NEEDS)
-        comparison = await _compare_servers(ctx, service_a=service_a, service_b=service_b, window=window)
+        comparison = await _compare_servers(
+            ctx, service_a=service_a, service_b=service_b, window=window
+        )
         sys.stdout.write(_render(comparison, fmt))
         return 0
 

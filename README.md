@@ -2,13 +2,13 @@
 
 > Production-grade observability for distributed MCP server fleets.
 
-**Status:** v0.1.0 — walking skeleton (two-package monorepo, query tools, SDK).
+**Status:** v0.2.0 — 5 query tools live (error rate, p99 latency, server comparison added).
 
 ## Packages
 
 | Package | PyPI name | Description |
 |---------|-----------|-------------|
-| `packages/server` | `mcp-observatory` | MCP query router — 2 query tools, Typer CLI, FastMCP stdio surface |
+| `packages/server` | `mcp-observatory` | MCP query router — 5 query tools, Typer CLI, FastMCP stdio surface |
 | `packages/sdk` | `mcp-observatory-sdk` | Tiny SDK: `instrument(server)`, Prometheus metrics, OTel spans, ASGI `/metrics` |
 
 ## Install
@@ -31,6 +31,15 @@ observatory list-mcp-servers --prom-url http://localhost:9090
 
 # Get per-tool call rate for a specific service (1h window)
 observatory get-tool-call-rate my-service --window 1h --prom-url http://localhost:9090
+
+# Get error rate for a service (ratio of error calls to total)
+observatory get-tool-error-rate my-service --window 1h --prom-url http://localhost:9090
+
+# Get p99 latency for a specific tool on a service
+observatory get-tool-latency-p99 my-service --tool my_tool --window 1h --prom-url http://localhost:9090
+
+# Compare two services side-by-side
+observatory compare-servers svc-a svc-b --window 1h --prom-url http://localhost:9090
 
 # Run as MCP stdio server (for Claude Desktop / any MCP client)
 observatory serve-mcp
@@ -110,8 +119,8 @@ uv run pytest -m mcp_contract -v
 ## Docker
 
 ```bash
-docker pull ghcr.io/vellankikoti/mcp-observatory:v0.1.0
-docker run --rm ghcr.io/vellankikoti/mcp-observatory:v0.1.0 list-mcp-servers --help
+docker pull ghcr.io/vellankikoti/mcp-observatory:v0.2.0
+docker run --rm ghcr.io/vellankikoti/mcp-observatory:v0.2.0 list-mcp-servers --help
 ```
 
 ## Helm
